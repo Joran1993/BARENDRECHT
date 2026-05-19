@@ -1,0 +1,24 @@
+{
+  "name": "CIRQO",
+  "short_name": "CIRQO",
+  "description": "Van bouwafval naar bruikbaar materiaal",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#e67026",
+  "theme_color": "#e67026",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/static/icon-cirqo-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icon-cirqo-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

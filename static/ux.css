@@ -1,0 +1,244 @@
+/* ── UX enhancement layer — animaties & micro-interactions ──────────────────
+   Laagt over base.css/scan.css heen, overschrijft niets kritisch.
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* ── 1. Page load fade-in ────────────────────────────────────────────────── */
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+body { animation: pageIn 0.28s cubic-bezier(.22,.68,0,1.1) both; }
+
+/* ── 2. Tab content fade + slide op activatie ────────────────────────────── */
+@keyframes tabIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.tab.active {
+  animation: tabIn 0.24s cubic-bezier(.22,.68,0,1.15) both;
+}
+
+/* ── 3. Button tap feedback ──────────────────────────────────────────────── */
+.btn,
+.btn-sm,
+.btn-del,
+.hdr-btn,
+.tabbar-btn,
+.list-maintab,
+.list-subtab,
+.cat-btn,
+.analyse-btn {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.btn:active:not(:disabled),
+.btn-sm:active,
+.btn-del:active {
+  transform: scale(0.96);
+  transition: transform 0.08s ease, background 0.08s ease;
+}
+.btn-primary:active:not(:disabled) {
+  box-shadow: 0 2px 10px rgba(230,112,38,0.28);
+}
+.hdr-btn:active { opacity: 0.55; }
+
+/* ── 4. Input focus: glow + subtiele lift ────────────────────────────────── */
+.field input,
+.field select,
+.field textarea {
+  transition: border-color 0.18s, background 0.18s,
+              box-shadow 0.22s, transform 0.18s;
+}
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  box-shadow: 0 0 0 3px rgba(230,112,38,0.12);
+  transform: translateY(-1px);
+}
+
+/* ── 5. Modal slide-up entrance ──────────────────────────────────────────── */
+@keyframes backdropIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes sheetUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);   opacity: 1; }
+}
+@keyframes sheetDown {
+  from { transform: translateY(0);   opacity: 1; }
+  to   { transform: translateY(100%); opacity: 0; }
+}
+.modal {
+  animation: backdropIn 0.22s ease both;
+}
+.modal-box {
+  animation: sheetUp 0.38s cubic-bezier(.2,.82,.26,1) both;
+}
+
+/* ── 6. Result card pop-in ───────────────────────────────────────────────── */
+@keyframes cardPop {
+  from { opacity: 0; transform: scale(0.97) translateY(10px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+.result-card:not(.hidden) {
+  animation: cardPop 0.32s cubic-bezier(.2,.82,.26,1) both;
+}
+
+/* ── 7. Header scroll shadow ─────────────────────────────────────────────── */
+.hdr {
+  transition: box-shadow 0.22s ease;
+}
+.hdr.scrolled {
+  box-shadow: 0 2px 14px rgba(0,0,0,0.08);
+}
+
+/* ── 8. Tabbar icon tap-bounce ───────────────────────────────────────────── */
+@keyframes iconBounce {
+  0%   { transform: scale(1); }
+  45%  { transform: scale(0.82); }
+  100% { transform: scale(1); }
+}
+.tabbar-btn.tapped svg,
+.tabbar-btn.tapped small {
+  animation: iconBounce 0.26s cubic-bezier(.2,.82,.26,1) both;
+}
+
+/* ── 9. List item stagger entrance ──────────────────────────────────────── */
+@keyframes itemIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.item-row {
+  animation: itemIn 0.26s ease both;
+  animation-delay: var(--stagger, 0ms);
+}
+
+/* ── 10. Skeleton shimmer ────────────────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -300% 0; }
+  100% { background-position: 300% 0; }
+}
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #f0ede8 25%,
+    #e5e0d8 50%,
+    #f0ede8 75%
+  );
+  background-size: 300% 100%;
+  animation: shimmer 1.5s ease infinite;
+  border-radius: 8px;
+  color: transparent !important;
+  pointer-events: none;
+}
+
+/* ── 11. Spinner ─────────────────────────────────────────────────────────── */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.spinner {
+  display: inline-block;
+  width: 15px; height: 15px;
+  border: 2px solid rgba(255,255,255,0.32);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.65s linear infinite;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+.spinner.dark {
+  border-color: rgba(0,0,0,0.12);
+  border-top-color: var(--ink);
+}
+.spinner.orange {
+  border-color: rgba(230,112,38,0.2);
+  border-top-color: var(--orange);
+}
+
+/* ── 12. Toast notification ─────────────────────────────────────────────── */
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(14px) scale(0.95); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0)    scale(1); }
+}
+@keyframes toastOut {
+  from { opacity: 1; transform: translateX(-50%) translateY(0)    scale(1); }
+  to   { opacity: 0; transform: translateX(-50%) translateY(6px)  scale(0.96); }
+}
+.ux-toast {
+  position: fixed;
+  bottom: calc(var(--sab, 0px) + 74px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 18px;
+  border-radius: 100px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.22);
+  animation: toastIn 0.3s cubic-bezier(.2,.82,.26,1) both;
+  background: #1a1a1a;
+  color: #fff;
+}
+.ux-toast.success { background: #1a1a1a; }
+.ux-toast.error   { background: var(--danger, #C8201A); }
+.ux-toast.info    { background: var(--orange, #e67026); }
+.ux-toast.leaving { animation: toastOut 0.22s ease both; }
+
+/* ── 13. Scan circle — betere press feedback ─────────────────────────────── */
+.scan-circle-btn:active .scan-circle-inner {
+  transform: scale(0.93);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12) !important;
+}
+.scan-circle-inner {
+  transition: transform 0.12s ease, box-shadow 0.12s ease !important;
+}
+
+/* ── 14. Subtabs slide-indicator ────────────────────────────────────────── */
+.list-subtab,
+.list-maintab {
+  transition: color 0.18s, border-color 0.18s, background 0.18s;
+  position: relative;
+}
+
+/* ── 15. Smooth hide/show voor hidden elements ───────────────────────────── */
+.result-card,
+.scan-error,
+#bedrijven-card {
+  transition: opacity 0.2s ease;
+}
+.result-card.hidden,
+.scan-error.hidden,
+#bedrijven-card.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ── 16. Image preview fade-in ───────────────────────────────────────────── */
+@keyframes imgFadeIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to   { opacity: 1; transform: scale(1); }
+}
+#preview-img {
+  animation: imgFadeIn 0.25s ease both;
+  border-radius: 12px;
+}
+
+/* ── 17. Swipe delete — smoother easing ─────────────────────────────────── */
+.swipe-wrap .item-row {
+  transition: transform 0.22s cubic-bezier(.2,.82,.26,1) !important;
+}
+.swipe-del-btn {
+  transition: opacity 0.22s cubic-bezier(.2,.82,.26,1) !important;
+}
+
+/* ── 18. Pull-to-refresh gevoel ─────────────────────────────────────────── */
+.tab { overscroll-behavior-y: contain; }

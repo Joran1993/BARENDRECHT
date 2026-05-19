@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Wachtwoord instellen — CIRQO</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="/static/base.css?v=5">
+  <style>
+    body {
+      min-height: 100dvh; display: flex; flex-direction: column;
+      justify-content: center;
+      padding: calc(env(safe-area-inset-top) + 32px) 16px
+               calc(env(safe-area-inset-bottom) + 32px);
+    }
+    .wrap { width: 100%; max-width: 400px; margin: 0 auto; }
+    .brand { margin-bottom: 32px; text-align: center; }
+    .panel {
+      background: #fff; border: 1px solid var(--border);
+      border-radius: 16px; padding: 24px 20px;
+    }
+    .panel h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.4rem; font-weight: 900; margin-bottom: 8px;
+    }
+    .panel p { font-size: 0.83rem; color: var(--muted); margin-bottom: 20px; }
+    .ok-box {
+      text-align: center; padding: 24px 16px;
+    }
+    .ok-icon { font-size: 2.4rem; margin-bottom: 12px; }
+    .ok-title { font-family: 'Outfit', sans-serif; font-size: 1.2rem; font-weight: 900; margin-bottom: 8px; }
+    .ok-sub { font-size: 0.83rem; color: var(--muted); margin-bottom: 20px; }
+  </style>
+  <link rel="stylesheet" href="/brand.css">
+</head>
+<body>
+  <div class="wrap">
+    <div class="brand">
+      <img src="/static/bouwkringloop-logo.jpg" alt="De Bouwkringloop" id="hdr-logo" style="height:52px;max-width:100%;width:auto;margin:0 auto 10px;display:block;object-fit:contain;">
+    </div>
+
+    <div class="panel" id="panel-reset">
+      <h1>Nieuw wachtwoord</h1>
+      <p>Kies een nieuw wachtwoord voor je account.</p>
+      <div class="field">
+        <label>Nieuw wachtwoord</label>
+        <input type="password" id="pw1" autocomplete="new-password" minlength="6" required>
+      </div>
+      <div class="field">
+        <label>Herhaal wachtwoord</label>
+        <input type="password" id="pw2" autocomplete="new-password" minlength="6" required>
+      </div>
+      <button id="submit-btn" class="btn btn-primary">Wachtwoord instellen</button>
+      <div class="error-bar" id="err"></div>
+    </div>
+
+    <div class="panel" id="panel-ok" style="display:none;">
+      <div class="ok-box">
+        <div class="ok-icon">✓</div>
+        <div class="ok-title">Wachtwoord ingesteld</div>
+        <div class="ok-sub">Je wordt automatisch doorgestuurd…</div>
+        <a href="/login" class="btn btn-primary" style="display:inline-block;">Naar inloggen →</a>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-err" style="display:none;">
+      <div class="ok-box">
+        <div class="ok-icon" style="color:#c0392b;">✕</div>
+        <div class="ok-title">Link verlopen</div>
+        <div class="ok-sub">Deze herstellink is verlopen of al gebruikt. Vraag een nieuwe aan via het inlogscherm.</div>
+        <a href="/login" class="btn btn-primary" style="display:inline-block;">Terug naar inloggen</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script>
+    firebase.initializeApp({
+      apiKey: "AIzaSyDZOfYXQHCu3Bs7xjuukneAShqCEwvICTY",
+      authDomain: "database-e5575.firebaseapp.com",
+      projectId: "database-e5575",
+      storageBucket: "database-e5575.firebasestorage.app",
+      messagingSenderId: "317817675164",
+      appId: "1:317817675164:web:d3aaf57a2bd1e3c6537c59",
+    });
+    const fbAuth = firebase.auth();
+
+    const params = new URLSearchParams(location.search);
+    const mode   = params.get('mode');
+    const oobCode = params.get('oobCode');
+
+    if (mode !== 'resetPassword' || !oobCode) {
+      document.getElementById('panel-reset').style.display = 'none';
+      document.getElementById('panel-err').style.display = 'block';
+    }
+
+    // Valideer de code alvast
+    fbAuth.verifyPasswordResetCode(oobCode).catch(() => {
+      document.getElementById('panel-reset').style.display = 'none';
+      document.getElementById('panel-err').style.display = 'block';
+    });
+
+    document.getElementById('submit-btn').addEventListener('click', async () => {
+      const pw1 = document.getElementById('pw1').value;
+      const pw2 = document.getElementById('pw2').value;
+      const err = document.getElementById('err');
+      err.style.display = 'none';
+
+      if (pw1.length < 6) {
+        err.textContent = 'Wachtwoord moet minimaal 6 tekens zijn.'; err.style.display = 'block'; return;
+      }
+      if (pw1 !== pw2) {
+        err.textContent = 'Wachtwoorden komen niet overeen.'; err.style.display = 'block'; return;
+      }
+
+      const btn = document.getElementById('submit-btn');
+      btn.disabled = true; btn.textContent = 'Bezig…';
+
+      try {
+        // Haal e-mail op vóór reset (nodig voor sign-in daarna)
+        const email = await fbAuth.verifyPasswordResetCode(oobCode);
+        // Reset Firebase wachtwoord
+        await fbAuth.confirmPasswordReset(oobCode, pw1);
+        // Sign in om ID-token te krijgen
+        try {
+          const cred = await fbAuth.signInWithEmailAndPassword(email, pw1);
+          const idToken = await cred.user.getIdToken();
+          // Sync nieuw wachtwoord naar Supabase
+          await fetch('/api/auth/sync-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id_token: idToken, password: pw1 }),
+          });
+        } catch (syncErr) {
+          console.warn('[sync-password] Kon Supabase niet bijwerken:', syncErr);
+        }
+        document.getElementById('panel-reset').style.display = 'none';
+        document.getElementById('panel-ok').style.display = 'block';
+        setTimeout(() => { location.href = '/login'; }, 2500);
+      } catch (ex) {
+        let msg = ex.message || 'Fout';
+        if (msg.includes('expired') || msg.includes('invalid')) msg = 'Deze link is verlopen. Vraag een nieuwe herstelmail aan.';
+        err.textContent = msg; err.style.display = 'block';
+        btn.disabled = false; btn.textContent = 'Wachtwoord instellen';
+      }
+    });
+  </script>
+</body>
+</html>

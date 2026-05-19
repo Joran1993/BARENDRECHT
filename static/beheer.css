@@ -1,0 +1,379 @@
+/* Beheer app — zelfde flexbox column layout als scan app */
+
+body {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+}
+
+.tabbar {
+  display: flex;
+  flex-shrink: 0;
+  order: 99;
+  padding-bottom: var(--sab);
+  background: #fff;
+  border-top: 1px solid var(--border);
+}
+.tabbar-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 10px 0;
+  background: none;
+  border: none;
+  border-top: 3px solid transparent;
+  color: var(--muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.tabbar-btn small { font-size: inherit; }
+.tabbar-btn.active { color: var(--orange); border-top-color: var(--orange); }
+
+.tab {
+  display: none;
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--bg);
+}
+.tab.active { display: block; }
+
+.hidden { display: none !important; }
+
+/* ── Sectie card ──────────────────────────────────────────────────────────────── */
+.section-card {
+  margin: 16px;
+  padding: 18px 16px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.section-title {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+/* ── Gebruikerslijst ──────────────────────────────────────────────────────────── */
+.user-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  background: #fff;
+}
+.user-info { flex: 1; min-width: 0; }
+.user-name {
+  font-weight: 600;
+  font-size: 0.92rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.user-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+/* ── Gemeente cards ───────────────────────────────────────────────────────────── */
+.gemeente-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  background: #fff;
+}
+.gemeente-naam {
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+.gemeente-meta {
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* ── Gemeente detail panel ────────────────────────────────────────────────────── */
+.gd-panel {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.25s ease;
+  z-index: 200;
+  overflow: hidden;
+}
+.gd-panel.open { transform: translateX(0); }
+.gd-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(var(--sat) + 12px) 16px 12px;
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.gd-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 900;
+}
+.gd-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.gd-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.gd-stat {
+  background: #fff;
+  padding: 16px;
+  text-align: center;
+}
+.gd-stat-val {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: var(--orange);
+}
+.gd-stat-lbl {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.gd-section-title {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  padding: 16px 16px 8px;
+}
+.gd-item-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  background: #fff;
+}
+.gd-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.gd-thumb-empty {
+  background: var(--surface);
+}
+.gd-item-info { flex: 1; min-width: 0; }
+.gd-item-label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gd-item-meta {
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* ── Categorie checkboxes ─────────────────────────────────────────────────────── */
+.cat-checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+.cat-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  background: var(--surface);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink);
+  transition: all 0.15s;
+  user-select: none;
+}
+.cat-check input { display: none; }
+.cat-check.checked { background: rgba(240,120,32,0.1); border-color: var(--orange); color: var(--orange); }
+
+/* ── Inzamellijst — auto-save status ─────────────────────────────────────────── */
+.il-save-bar { min-height: 20px; margin-top: 4px; }
+.il-save-status {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--muted);
+  transition: color 0.2s;
+}
+.il-save-status.saving { color: var(--muted); }
+.il-save-status.saved  { color: #4caf50; }
+.il-save-status.error  { color: #e53935; }
+
+/* ── Inzamellijst — hiërarchische productlijst ───────────────────────────────── */
+.product-sectie {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+}
+
+.product-sectie-hdr {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  cursor: pointer;
+  user-select: none;
+}
+.product-sectie-hdr label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+.product-sectie-hdr label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--orange);
+  cursor: pointer;
+}
+.sectie-nr {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--muted);
+  min-width: 18px;
+}
+.sectie-naam {
+  flex: 1;
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--ink);
+}
+.sectie-chevron {
+  font-size: 1.1rem;
+  color: var(--muted);
+  transition: transform 0.2s;
+  transform: rotate(0deg);
+}
+.product-sectie-hdr.open .sectie-chevron {
+  transform: rotate(90deg);
+}
+
+.product-sectie-body {
+  display: none;
+  border-top: 1px solid var(--border);
+  padding-bottom: 4px;
+}
+.product-sectie-body.open { display: block; }
+
+.product-subgroep-hdr {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px 6px 36px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+}
+.product-subgroep-hdr input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--orange);
+  cursor: pointer;
+}
+
+.product-producten {
+  padding: 2px 0 6px 52px;
+}
+
+.product-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 16px 7px 0;
+  cursor: pointer;
+  font-size: 0.84rem;
+  color: var(--ink);
+  border-radius: 6px;
+}
+.product-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--orange);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.product-item:hover { background: var(--surface); }
+
+/* ── Bedrijf kaarten ──────────────────────────────────────────────────────────── */
+.bedrijf-card {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  background: #fff;
+}
+.bedrijf-naam {
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+.bedrijf-meta {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+.bedrijf-cats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.bedrijf-cat {
+  background: rgba(240,120,32,0.1);
+  color: var(--orange);
+  border-radius: 100px;
+  padding: 2px 10px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}

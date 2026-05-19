@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <link rel="icon" href="/static/favicon.ico">
+  <link rel="apple-touch-icon" href="/static/icon-bouwkringloop-192.png">
+  <title>De Bouwkringloop · Kiosk</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/kiosk.css">
+  <link rel="stylesheet" href="/brand.css">
+  <link rel="stylesheet" href="/static/ux.css">
+</head>
+<body>
+
+  <!-- Scherm 1: Camera -->
+  <div id="scherm-camera" class="scherm actief">
+    <div class="kiosk-hdr">
+      <img src="/static/bouwkringloop-logo.jpg" class="kiosk-logo" alt="De Bouwkringloop">
+      <p class="kiosk-sub">Milieustraat Barendrecht</p>
+    </div>
+    <div class="camera-wrap">
+      <video id="video" autoplay playsinline></video>
+      <canvas id="canvas" style="display:none"></canvas>
+      <div class="camera-kader"></div>
+    </div>
+    <div class="camera-footer">
+      <p class="camera-instructie">Richt de camera op het bouwmateriaal</p>
+      <button id="scan-btn" class="scan-btn" onclick="maakFoto()">
+        <span class="scan-btn-ring"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Scherm 2: Laden -->
+  <div id="scherm-laden" class="scherm">
+    <div class="laden-wrap">
+      <div class="laden-spinner"></div>
+      <p class="laden-tekst">Analyseren…</p>
+    </div>
+  </div>
+
+  <!-- Scherm 3: Resultaat -->
+  <div id="scherm-resultaat" class="scherm">
+    <div id="resultaat-inhoud" class="resultaat-inhoud">
+      <div class="resultaat-icoon" id="resultaat-icoon"></div>
+      <div class="resultaat-label" id="resultaat-label"></div>
+      <div class="resultaat-tekst" id="resultaat-tekst"></div>
+    </div>
+    <div class="resultaat-footer">
+      <div class="resultaat-balk" id="resultaat-balk"></div>
+      <button class="opnieuw-btn" onclick="opnieuw()">Opnieuw scannen</button>
+    </div>
+  </div>
+
+  <script src="/static/kiosk.js"></script>
+  <script src="/static/ux.js"></script>
+</body>
+</html>

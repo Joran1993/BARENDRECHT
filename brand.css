@@ -1,0 +1,25 @@
+/* De Bouwkringloop — brand overrides */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@700;800;900&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --orange:  #e67026;
+  --orange2: #c45c1a;
+  --surface: #f8f4ef;
+  --border:  #e4e4e9;
+  --muted:   #67676e;
+}
+
+body { font-family: 'Inter', system-ui, sans-serif; }
+
+.hdr-logo,
+.panel h1,
+.result-label,
+.result-weight,
+.modal-body h3,
+.modal-weight-text,
+.stat-box span,
+.cat-count,
+.item-kg,
+.app-header-wordmark {
+  font-family: 'Outfit', sans-serif;
+}

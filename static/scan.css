@@ -1,0 +1,573 @@
+/* Scan app layout — flexbox column, geen fixed positioning */
+
+body {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+}
+
+/* .hdr is flex-shrink: 0 via base.css */
+
+/* ── Tab bar (onderaan) ───────────────────────────────────────────────────── */
+.tabbar {
+  display: flex;
+  flex-shrink: 0;
+  order: 99; /* altijd onderaan */
+  padding-bottom: var(--sab);
+  background: #fff;
+  border-top: 1px solid var(--border);
+}
+.tabbar-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 10px 0;
+  background: none;
+  border: none;
+  border-top: 3px solid transparent;
+  color: var(--muted);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.tabbar-btn small { font-size: inherit; }
+.tabbar-btn.active { color: var(--orange); border-top-color: var(--orange); }
+
+/* ── Tab content ─────────────────────────────────────────────────────────── */
+.tab {
+  display: none;
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--bg);
+}
+.tab.active { display: flex; flex-direction: column; }
+#tab-scan.active { justify-content: flex-start; }
+
+/* ── Utilities ───────────────────────────────────────────────────────────── */
+.hidden { display: none !important; }
+
+/* ── Swipe-to-delete ─────────────────────────────────────────────────────── */
+.swipe-wrap {
+  position: relative;
+  overflow: hidden;
+}
+.swipe-del-btn {
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  width: 72px;
+  background: var(--danger);
+  border: none;
+  color: #fff;
+  font-size: 1.3rem;
+  cursor: pointer;
+  opacity: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.15s;
+}
+.swipe-wrap .item-row {
+  background: #fff;
+  position: relative;
+  z-index: 1;
+  transform: translateX(0);
+  will-change: transform;
+}
+
+/* ── Scan tab ────────────────────────────────────────────────────────────── */
+
+/* Hero staat */
+.scan-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 24px 24px 32px;
+  gap: 0;
+}
+.scan-hero-intro {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-align: center;
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+.scan-hero-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 28px;
+  text-align: center;
+}
+.scan-circle-btn {
+  display: block;
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.15s;
+}
+.scan-circle-btn input { display: none; }
+.scan-circle-btn:active { transform: scale(0.96); box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+.scan-circle-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.scan-illustratie {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+.scan-hero-reacties-btn {
+  margin-top: 28px;
+  padding: 10px 36px;
+  border-radius: 100px;
+  border: 1.5px solid var(--orange);
+  background: none;
+  color: #444;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.10);
+}
+.scan-hero-sub {
+  margin-top: 20px;
+  font-size: 0.82rem;
+  color: var(--muted);
+  font-weight: 600;
+  text-align: center;
+}
+
+.preview-wrap {
+  position: relative;
+  margin: 16px auto;
+  max-width: 480px;
+}
+.preview-wrap img {
+  display: block;
+  width: 100%;
+  max-height: 320px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+.preview-clear {
+  position: absolute;
+  top: 10px; right: 10px;
+  width: 32px; height: 32px;
+  background: rgba(0,0,0,0.5);
+  border: none; border-radius: 50%;
+  color: #fff; font-size: 1.1rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.locatie-txt {
+  font-size: 0.78rem;
+  color: var(--muted);
+  text-align: center;
+  margin: -6px 16px 8px;
+}
+
+.analyse-btn {
+  margin: 0 16px 16px;
+  width: calc(100% - 32px);
+}
+
+.result-card {
+  margin: 0 16px 16px;
+  padding: 18px 16px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--orange);
+  border-radius: 10px;
+}
+.result-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.5rem; font-weight: 900;
+  margin-bottom: 4px;
+}
+.result-weight {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.1rem; font-weight: 700;
+  color: var(--orange); margin-bottom: 4px;
+}
+.result-detail { font-size: 0.83rem; color: var(--muted); line-height: 1.6; }
+.result-co2 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1rem; font-weight: 700;
+  color: #2e7d32; margin-bottom: 4px;
+}
+.modal-co2 { font-size: 0.85rem; font-weight: 700; color: #2e7d32; margin: 0 0 4px; }
+.result-acceptatie {
+  display: inline-block;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 20px; margin-bottom: 10px;
+}
+.result-acceptatie.geaccepteerd { background: #e6f9ef; color: #1a7a40; }
+.result-acceptatie.geweigerd    { background: #fdecea; color: #b71c1c; }
+
+.scan-error {
+  margin: 0 16px;
+  padding: 14px;
+  border: 1px solid var(--danger);
+  border-left: 3px solid var(--danger);
+  border-radius: 8px;
+  color: var(--danger);
+  font-size: 0.83rem;
+  background: rgba(200,32,26,0.04);
+}
+
+/* ── Lijst tab ───────────────────────────────────────────────────────────── */
+.list-maintabs {
+  display: flex;
+  background: #fff;
+  border-bottom: 2px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 12;
+}
+.list-maintab {
+  flex: 1;
+  padding: 14px 8px;
+  font-size: 0.9rem;
+  font-weight: 800;
+  border: none;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: color .15s, border-color .15s;
+}
+.list-maintab[data-main="aanbieden"].active { color: var(--orange); border-bottom-color: var(--orange); }
+.list-maintab[data-main="ontvangen"].active { color: var(--blauw);  border-bottom-color: var(--blauw); }
+
+.list-subtabs {
+  display: flex;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 49px;
+  z-index: 11;
+}
+.list-subtab {
+  flex: 1;
+  padding: 9px 8px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  border: none;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color .15s, border-color .15s;
+}
+.list-subtab.active { color: var(--orange); border-bottom-color: var(--orange); }
+#tab-list[data-main="ontvangen"] .list-subtab.active { color: var(--blauw); border-bottom-color: var(--blauw); }
+
+.search-wrap {
+  padding: 12px 16px;
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.search-wrap input {
+  display: block;
+  width: 100%;
+  height: 42px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 0 16px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.9rem;
+  color: var(--ink);
+  outline: none;
+  -webkit-appearance: none;
+}
+.search-wrap input:focus { border-color: var(--orange); background: #fff; }
+
+.item-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  background: #fff;
+  cursor: pointer;
+}
+.item-row:active { background: var(--surface); }
+.item-thumb {
+  width: 48px; height: 48px;
+  object-fit: cover;
+  border-radius: 8px;
+  background: var(--surface);
+  flex-shrink: 0;
+}
+.item-info { flex: 1; min-width: 0; }
+.item-name {
+  font-weight: 600; font-size: 0.92rem;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+.item-meta {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  font-size: 0.72rem; color: var(--muted);
+}
+.item-kg {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700; font-size: 0.82rem; color: var(--orange);
+}
+.item-co2 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700; font-size: 0.82rem; color: #2e7d32;
+}
+.item-cat {
+  background: var(--surface); border: 1px solid var(--border);
+  padding: 1px 7px; border-radius: 100px;
+  font-size: 0.62rem; font-weight: 700;
+  letter-spacing: 0.04em; text-transform: uppercase;
+}
+.aanbieder-van { color: var(--orange); font-weight: 600; }
+.aanbieder-pijl { color: var(--muted); }
+.aanbieder-aan { color: #3b5bdb; font-weight: 600; }
+.item-chevron { color: var(--muted); font-size: 1.1rem; flex-shrink: 0; }
+.item-chat-icon { font-size: 1.15rem; flex-shrink: 0; padding: 4px 2px; opacity: .75; position: relative; }
+.item-chat-icon.has-unread::after { content: ""; position: absolute; top: 2px; right: 0px; width: 8px; height: 8px; border-radius: 50%; background: #e53935; border: 1.5px solid #fff; }
+.item-status-badge { padding: 1px 7px; border-radius: 100px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+.item-status-open { background: #fff3e0; color: #e67e00; }
+.item-status-ophalen { background: #e8f5e9; color: #2e7d32; }
+.item-status-niet_nodig { background: var(--surface); color: var(--muted); }
+
+/* ── Stats tab ───────────────────────────────────────────────────────────── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+}
+.stat-box {
+  padding: 24px 16px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.stat-box:nth-child(2n) { border-right: none; }
+.stat-box.wide { grid-column: span 2; border-right: none; }
+.stat-box.wide:last-child { border-bottom: none; }
+.stat-box.co2-box small { color: var(--orange); }
+.stat-box.co2-box span  { color: var(--orange); }
+.stat-box span {
+  display: block;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 2.6rem; font-weight: 900; line-height: 1;
+  margin-bottom: 6px;
+}
+.stat-box small {
+  font-size: 0.62rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.1em; color: var(--orange);
+}
+.cat-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  background: #fff;
+}
+.cat-name { font-size: 0.9rem; font-weight: 500; }
+.cat-count {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.1rem; font-weight: 900; color: var(--orange);
+}
+
+/* ── Deelnemers ──────────────────────────────────────────────────────────── */
+.deelnemers-header {
+  font-size: 0.62rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--orange);
+  padding: 20px 16px 8px;
+}
+.deelnemer-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  background: #fff;
+}
+.deelnemer-naam { font-size: 0.88rem; font-weight: 600; }
+.deelnemer-gem  { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+.deelnemer-cats { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.deelnemer-cat  { font-size: 0.65rem; font-weight: 600; background: var(--surface); color: var(--muted); padding: 2px 7px; border-radius: 100px; }
+
+/* ── Modal ───────────────────────────────────────────────────────────────── */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(26,25,20,0.5);
+  display: flex;
+  align-items: flex-end;
+  z-index: 500;
+  backdrop-filter: blur(4px);
+}
+.modal-sheet {
+  background: #fff;
+  width: 100%;
+  max-height: 90dvh;
+  overflow-y: auto;
+  border-radius: 16px 16px 0 0;
+  padding-bottom: var(--sab);
+  position: relative;
+}
+.modal-close {
+  position: absolute; top: 12px; right: 14px;
+  width: 30px; height: 30px;
+  background: var(--surface); border: none; border-radius: 50%;
+  color: var(--muted); font-size: 1.1rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.modal-img {
+  display: block; width: 100%; max-height: 300px;
+  object-fit: contain; object-position: center;
+  background: var(--surface);
+  border-radius: 16px 16px 0 0;
+}
+.modal-body { padding: 20px 16px; }
+.modal-ts { font-size: 0.7rem; color: var(--muted); margin-bottom: 8px; }
+.modal-body h3 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.5rem; font-weight: 900; margin-bottom: 4px;
+}
+.modal-weight {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.1rem; font-weight: 700; color: var(--orange); margin-bottom: 4px;
+}
+.modal-detail { font-size: 0.83rem; color: var(--muted); line-height: 1.6; }
+.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+.modal-actions { display: flex; gap: 10px; margin-top: 4px; }
+.modal-actions .btn { flex: 1; padding: 14px; }
+
+/* Chat */
+.chat-wrap { display: flex; flex-direction: column; gap: 0; max-height: 260px; overflow-y: auto; padding-right: 2px; }
+.chat-msg { max-width: 78%; padding: 8px 12px; border-radius: 16px; font-size: 0.84rem; line-height: 1.45; word-break: break-word; }
+.chat-msg.mine { align-self: flex-end; background: var(--orange); color: #fff; border-bottom-right-radius: 4px; }
+.chat-msg.theirs { align-self: flex-start; background: var(--border); color: var(--text); border-bottom-left-radius: 4px; }
+.chat-msg-naam { font-size: 0.68rem; font-weight: 700; opacity: .7; margin-bottom: 2px; }
+.chat-msg-tijd { font-size: 0.65rem; opacity: .55; margin-top: 3px; text-align: right; }
+.chat-spacer { height: 6px; }
+.chat-input-row { display: flex; gap: 8px; margin-top: 10px; }
+.chat-input-row input { flex: 1; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 100px; font-size: 0.9rem; outline: none; }
+.chat-input-row input:focus { border-color: var(--orange); }
+.chat-send { padding: 10px 16px; border-radius: 100px; border: none; background: var(--orange); color: #fff; font-weight: 700; font-size: 0.88rem; cursor: pointer; flex-shrink: 0; }
+
+/* ── Toggle switch ───────────────────────────────────────────────────────────── */
+.toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider { position: absolute; cursor: pointer; inset: 0; background: var(--border); border-radius: 24px; transition: .2s; }
+.toggle-slider:before { content: ""; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: .2s; }
+.toggle-switch input:checked + .toggle-slider { background: #4caf50; }
+.toggle-switch input:checked + .toggle-slider:before { transform: translateX(20px); }
+
+/* ── Stats gemeente filter ───────────────────────────────────────────────────── */
+.stats-gemeente-sel {
+  display: block;
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--ink);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 10px 14px;
+  height: 42px;
+  outline: none;
+  -webkit-appearance: none;
+}
+.stats-gemeente-sel:focus { border-color: var(--orange); background: #fff; }
+
+/* ── Gemeente stats overzicht ────────────────────────────────────────────────── */
+.gem-stats-header {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  padding: 16px 16px 8px;
+}
+.gem-stat-row {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+}
+.gem-stat-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+.gem-stat-naam {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.gem-stat-items {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+.gem-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.gem-bar {
+  height: 6px;
+  border-radius: 3px;
+  min-width: 4px;
+  transition: width 0.4s ease;
+}
+.gem-bar-kg   { background: var(--orange); }
+.gem-bar-co2  { background: var(--blauw); }
+.gem-bar-label {
+  font-size: 0.72rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.gem-bar-label.co2 { color: var(--blauw2); }
+
+/* ── Netwerk partner list ──────────────────────────────────────────────────── */
+.netwerk-titel {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  padding: 16px 16px 8px;
+}
+.netwerk-partner-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  background: #fff;
+}
+.netwerk-partner-naam { font-size: 0.9rem; font-weight: 600; }
+.netwerk-partner-count { font-size: 0.72rem; color: var(--muted); }

@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="CIRQO">
+  <link rel="manifest" href="/static/manifest.json">
+  <link rel="icon" href="/static/icon-cirqo-192.png">
+  <link rel="apple-touch-icon" href="/static/icon-cirqo-192.png">
+  <title>Inloggen — CIRQO</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="/static/base.css?v=5">
+  <style>
+    body {
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: calc(env(safe-area-inset-top) + 32px) 16px
+               calc(env(safe-area-inset-bottom) + 32px);
+    }
+    .wrap { width: 100%; max-width: 400px; margin: 0 auto; }
+    .brand { margin-bottom: 32px; }
+    .brand-sub {
+      font-size: 0.65rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.12em;
+      color: var(--orange); margin-top: 4px;
+    }
+    .panel {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px 20px;
+    }
+    .panel h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.6rem; font-weight: 900;
+      margin-bottom: 20px;
+    }
+  </style>
+  <link rel="stylesheet" href="/brand.css">
+  <link rel="stylesheet" href="/static/ux.css">
+</head>
+<body>
+  <div class="wrap">
+    <div class="brand" style="text-align:center;margin-bottom:28px;">
+      <img src="/static/bouwkringloop-logo.jpg" alt="De Bouwkringloop" style="height:52px;max-width:100%;width:auto;margin:0 auto 10px;display:block;object-fit:contain;">
+      <div class="brand-sub" style="text-align:center;">Digitaal productuitwisselingsnetwerk</div>
+    </div>
+    <div class="panel">
+      <h1>Inloggen</h1>
+      <form id="form">
+        <div class="field">
+          <label>E-mail of gebruikersnaam</label>
+          <input type="text" id="login-input" autocomplete="username" required>
+        </div>
+        <div class="field">
+          <label>Wachtwoord</label>
+          <div style="position:relative;">
+            <input type="password" id="login-pass" autocomplete="current-password" required style="padding-right:44px;width:100%;box-sizing:border-box;">
+            <button type="button" id="toggle-pass" onclick="(function(){var i=document.getElementById('login-pass'),b=document.getElementById('toggle-pass');i.type=i.type==='password'?'text':'password';b.innerHTML=i.type==='password'?eyeIcon:eyeOffIcon;})()" style="position:absolute;right:0;top:0;bottom:0;width:44px;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);padding:0;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <button type="submit" id="btn" class="btn btn-primary">Inloggen</button>
+        <div class="error-bar" id="err"></div>
+      </form>
+      <button id="reset-link" style="display:block;width:100%;margin-top:12px;background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:0.78rem;color:var(--muted);padding:6px;text-align:center;">Wachtwoord vergeten?</button>
+      <button onclick="onboardingOpen()" style="display:block;width:100%;margin-top:2px;background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:0.78rem;color:var(--muted);padding:6px;text-align:center;">Hoe werkt de app? →</button>
+    </div>
+
+    <!-- Wachtwoord herstel panel -->
+    <div class="panel" id="reset-panel" style="display:none;margin-top:12px;">
+      <h1 style="font-size:1.3rem;margin-bottom:16px;">Wachtwoord herstellen</h1>
+      <p style="font-size:0.83rem;color:var(--muted);margin-bottom:16px;">Vul je e-mailadres in. Als er een account mee verbonden is, ontvang je een herstelmail.</p>
+      <div class="field">
+        <label>E-mailadres</label>
+        <input type="email" id="reset-email" autocomplete="email" placeholder="naam@organisatie.nl">
+      </div>
+      <button id="reset-btn" class="btn btn-primary">Verstuur herstelmail</button>
+      <div class="error-bar" id="reset-err"></div>
+      <div id="reset-ok" style="display:none;margin-top:12px;padding:12px;background:#edf7f0;border-radius:10px;font-size:0.83rem;color:#3a7a52;text-align:center;">
+        ✓ Herstelmail verstuurd. Controleer je inbox.
+      </div>
+      <button id="reset-back" style="display:block;width:100%;margin-top:10px;background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:0.78rem;color:var(--muted);padding:6px;text-align:center;">← Terug naar inloggen</button>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+  <script>
+    const eyeIcon    = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+    const eyeOffIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+
+    if (localStorage.getItem('token')) {
+      const role = localStorage.getItem('role');
+      location.href = new URLSearchParams(location.search).get('redirect') || (role === 'bedrijf' ? '/bedrijf' : '/');
+    }
+
+    firebase.initializeApp({
+      apiKey: "AIzaSyDZOfYXQHCu3Bs7xjuukneAShqCEwvICTY",
+      authDomain: "database-e5575.firebaseapp.com",
+      projectId: "database-e5575",
+      storageBucket: "database-e5575.firebasestorage.app",
+      messagingSenderId: "317817675164",
+      appId: "1:317817675164:web:d3aaf57a2bd1e3c6537c59",
+    });
+    const fbAuth = firebase.auth();
+
+    document.getElementById('form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const btn = document.getElementById('btn');
+      const err = document.getElementById('err');
+      const input = document.getElementById('login-input').value.trim();
+      const pass  = document.getElementById('login-pass').value;
+      btn.disabled = true; btn.textContent = 'Bezig…'; err.style.display = 'none';
+
+      // Stap 1: probeer lokale login
+      try {
+        const fd = new FormData();
+        fd.append('username', input);
+        fd.append('password', pass);
+        const res = await fetch('/api/auth/login', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (res.ok) { _saveSession(data); _redirectNaLogin(data); return; }
+        // Lokaal mislukt — als het een e-mail is, probeer Firebase
+        if (!input.includes('@')) throw new Error(data.detail || 'Onjuiste gebruikersnaam of wachtwoord');
+      } catch (ex) {
+        if (!input.includes('@')) {
+          err.textContent = ex.message; err.style.display = 'block';
+          btn.disabled = false; btn.textContent = 'Inloggen'; return;
+        }
+      }
+
+      // Stap 2: Firebase login (alleen voor e-mailadressen)
+      try {
+        const cred = await fbAuth.signInWithEmailAndPassword(input, pass);
+        const idToken = await cred.user.getIdToken();
+        const res = await fetch('/api/auth/firebase-login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id_token: idToken }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Fout');
+        _saveSession(data); _redirectNaLogin(data);
+      } catch (ex) {
+        let msg = ex.message || 'Fout';
+        if (msg.includes('wrong-password') || msg.includes('user-not-found') || msg.includes('invalid-credential')) msg = 'E-mail of wachtwoord onjuist';
+        if (msg.includes('invalid-email')) msg = 'Ongeldig e-mailadres';
+        err.textContent = msg; err.style.display = 'block';
+        btn.disabled = false; btn.textContent = 'Inloggen';
+      }
+    });
+
+    // ── Wachtwoord vergeten ───────────────────────────────────────────────────
+    const panel     = document.getElementById('reset-panel');
+    const resetLink = document.getElementById('reset-link');
+    const resetBack = document.getElementById('reset-back');
+    const resetBtn  = document.getElementById('reset-btn');
+
+    resetLink.addEventListener('click', () => {
+      panel.style.display = 'block';
+      resetLink.style.display = 'none';
+      document.getElementById('reset-email').value = document.getElementById('login-input').value.includes('@')
+        ? document.getElementById('login-input').value.trim() : '';
+      document.getElementById('reset-ok').style.display = 'none';
+      document.getElementById('reset-err').style.display = 'none';
+    });
+
+    resetBack.addEventListener('click', () => {
+      panel.style.display = 'none';
+      resetLink.style.display = 'block';
+    });
+
+    resetBtn.addEventListener('click', async () => {
+      const email = document.getElementById('reset-email').value.trim();
+      const errEl = document.getElementById('reset-err');
+      const okEl  = document.getElementById('reset-ok');
+      errEl.style.display = 'none'; okEl.style.display = 'none';
+      if (!email || !email.includes('@')) {
+        errEl.textContent = 'Vul een geldig e-mailadres in.'; errEl.style.display = 'block'; return;
+      }
+      resetBtn.disabled = true; resetBtn.textContent = 'Bezig…';
+      try {
+        // Stap 1: zorg dat er een Firebase-account bestaat (ook voor Supabase-gebruikers)
+        const fd = new FormData(); fd.append('email', email);
+        await fetch('/api/auth/request-reset', { method: 'POST', body: fd });
+        // Stap 2: Firebase stuurt de reset-mail zelf
+        await fbAuth.sendPasswordResetEmail(email, {
+          url: 'https://app.cirqo.nl/login',
+          handleCodeInApp: false,
+        });
+        okEl.style.display = 'block';
+        resetBtn.style.display = 'none';
+      } catch (ex) {
+        errEl.textContent = 'Fout: ' + (ex.code || ex.message || 'onbekend');
+        errEl.style.display = 'block';
+        resetBtn.disabled = false; resetBtn.textContent = 'Verstuur herstelmail';
+      }
+    });
+
+    function _redirectNaLogin(data) {
+      location.href = new URLSearchParams(location.search).get('redirect') || (data.role === 'bedrijf' ? '/bedrijf' : '/');
+    }
+
+    function _saveSession(data) {
+      localStorage.setItem('token',       data.token);
+      localStorage.setItem('user_id',     data.user_id || '');
+      localStorage.setItem('username',    data.username);
+      localStorage.setItem('role',        data.role);
+      localStorage.setItem('gemeente',    data.gemeente || '');
+      localStorage.setItem('organisatie', data.organisatie || '');
+      localStorage.setItem('auth_type',   data.auth_type || 'local');
+      if (data.bedrijf_id) localStorage.setItem('bedrijf_id', data.bedrijf_id);
+      if (data.role === 'bedrijf') {
+        localStorage.setItem('bedrijf_token', data.token);
+        localStorage.setItem('bedrijf_naam', data.organisatie || data.username);
+      }
+    }
+  </script>
+
+
+
+  <style>
+    #ob-backdrop { position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.52);backdrop-filter:blur(5px);opacity:0;pointer-events:none;transition:opacity .34s ease; }
+    #ob-backdrop.ob-show { opacity:1;pointer-events:all; }
+    #ob-sheet { position:fixed;left:0;right:0;bottom:0;z-index:801;background:#fff;border-radius:26px 26px 0 0;padding:0 0 calc(env(safe-area-inset-bottom,0px) + 28px);box-shadow:0 -16px 56px rgba(0,0,0,.2);max-width:520px;margin:0 auto;transform:translateY(110%);transition:transform .48s cubic-bezier(.22,.8,.36,1);overflow:hidden;user-select:none; }
+    #ob-sheet.ob-show { transform:translateY(0); }
+    .ob-progress-track { height:3px;background:#f0ede8;margin:0;border-radius:0; }
+    .ob-progress-fill { height:100%;background:var(--orange,#e67026);border-radius:0 3px 3px 0;transition:width .42s cubic-bezier(.22,.8,.36,1); }
+    .ob-top-row { display:flex;align-items:center;justify-content:space-between;padding:14px 20px 0; }
+    .ob-handle { width:36px;height:4px;border-radius:2px;background:#E4E4E9;margin:0 auto; }
+    .ob-skip { background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:0.75rem;font-weight:600;color:#9A9690;padding:4px 0;transition:color .15s; }
+    .ob-skip:hover { color:#555; }
+    .ob-viewport { overflow:hidden;touch-action:pan-y; }
+    .ob-track { display:flex;will-change:transform; }
+    .ob-track.ob-animated { transition:transform .42s cubic-bezier(.22,.8,.36,1); }
+    .ob-slide { min-width:100%;padding:28px 32px 16px;text-align:center;box-sizing:border-box; }
+    .ob-slide .ob-icon-wrap,.ob-slide .ob-step-label,.ob-slide .ob-title,.ob-slide .ob-desc { opacity:0;transform:translateY(14px); }
+    .ob-slide.ob-active .ob-icon-wrap { animation:obItemIn .38s cubic-bezier(.2,.82,.26,1) .05s both; }
+    .ob-slide.ob-active .ob-step-label { animation:obItemIn .34s cubic-bezier(.2,.82,.26,1) .14s both; }
+    .ob-slide.ob-active .ob-title { animation:obItemIn .34s cubic-bezier(.2,.82,.26,1) .2s both; }
+    .ob-slide.ob-active .ob-desc { animation:obItemIn .34s cubic-bezier(.2,.82,.26,1) .27s both; }
+    @keyframes obItemIn { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+    .ob-icon-wrap { width:96px;height:96px;border-radius:50%;background:rgba(230,112,38,.1);display:flex;align-items:center;justify-content:center;margin:0 auto 22px; }
+    .ob-step-label { font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--orange,#e67026);margin-bottom:10px; }
+    .ob-title { font-family:'Outfit',sans-serif;font-size:1.5rem;font-weight:900;color:#1A1914;line-height:1.2;margin-bottom:12px; }
+    .ob-desc { font-size:0.88rem;color:#666;line-height:1.6;max-width:290px;margin:0 auto; }
+    .ob-dots { display:flex;justify-content:center;align-items:center;gap:6px;margin:22px 0 18px; }
+    .ob-dot { height:7px;border-radius:4px;background:#E4E4E9;cursor:pointer;transition:width .3s cubic-bezier(.22,.8,.36,1),background .3s ease;width:7px; }
+    .ob-dot.active { width:22px;background:var(--orange,#e67026); }
+    .ob-actions { padding:0 24px;display:flex;flex-direction:column;gap:10px; }
+    .ob-next { width:100%;padding:15px;background:var(--orange,#e67026);color:#fff;border:none;border-radius:14px;font-family:'Inter',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;letter-spacing:-.01em;transition:transform .12s ease,box-shadow .12s ease,background .15s;box-shadow:0 4px 18px rgba(230,112,38,.35); }
+    .ob-next:active { transform:scale(.96);box-shadow:0 2px 8px rgba(230,112,38,.2); }
+    .ob-back { width:100%;padding:10px;background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:.82rem;font-weight:600;color:#9A9690;transition:color .15s; }
+    .ob-back:hover { color:#555; }
+    .ob-cam-lens { transform-origin:26px 28px; }
+    .ob-slide.ob-active .ob-cam-lens { animation:obCamPulse 1.8s ease-in-out .4s infinite; }
+    @keyframes obCamPulse { 0%,100%{transform:scale(1);opacity:.55} 50%{transform:scale(1.4);opacity:1} }
+    .ob-cam-rays { transform-origin:26px 28px; }
+    .ob-slide.ob-active .ob-cam-rays { animation:obRaysFlash 2.2s ease-out .1s infinite; }
+    @keyframes obRaysFlash { 0%,50%,100%{opacity:0;transform:scale(.85)} 28%{opacity:1;transform:scale(1)} }
+    .ob-scanline,.ob-scanglow { transform:translateY(0); }
+    .ob-slide.ob-active .ob-scanline,.ob-slide.ob-active .ob-scanglow { animation:obScanMove 2.5s ease-in-out .3s infinite; }
+    @keyframes obScanMove { 0%{transform:translateY(0px);opacity:1} 72%{transform:translateY(22px);opacity:.9} 90%{transform:translateY(22px);opacity:0} 100%{transform:translateY(0);opacity:0} }
+    .ob-aibadge { transform-origin:40px 40px;transform:scale(0);opacity:0; }
+    .ob-slide.ob-active .ob-aibadge { animation:obBadgePop .45s cubic-bezier(.2,.82,.26,1) 1.6s forwards; }
+    @keyframes obBadgePop { 0%{transform:scale(0);opacity:0} 60%{transform:scale(1.18);opacity:1} 100%{transform:scale(1);opacity:1} }
+    .ob-ping { transform-origin:26px 26px;opacity:0; }
+    .ob-slide.ob-active .ob-ping1 { animation:obPingOut 2.4s ease-out .3s infinite; }
+    .ob-slide.ob-active .ob-ping2 { animation:obPingOut 2.4s ease-out 1.25s infinite; }
+    @keyframes obPingOut { 0%{transform:scale(.35);opacity:.9;stroke-width:3} 100%{transform:scale(2.4);opacity:0;stroke-width:.3} }
+    .ob-notif { transform-origin:37px 14px; }
+    .ob-slide.ob-active .ob-notif { animation:obNotifBounce 1.7s cubic-bezier(.2,.82,.26,1) .5s infinite; }
+    @keyframes obNotifBounce { 0%,55%,100%{transform:scale(1)} 28%{transform:scale(1.35)} }
+    .ob-circle { stroke-dasharray:126;stroke-dashoffset:126; }
+    .ob-check { stroke-dasharray:42;stroke-dashoffset:42; }
+    .ob-slide.ob-active .ob-circle { animation:obDrawLine .9s cubic-bezier(.22,.8,.36,1) .15s forwards; }
+    .ob-slide.ob-active .ob-check { animation:obDrawLine .5s cubic-bezier(.22,.8,.36,1) .95s forwards; }
+    @keyframes obDrawLine { to{stroke-dashoffset:0} }
+  </style>
+
+  <div id="ob-backdrop"></div>
+  <div id="ob-sheet">
+    <div class="ob-progress-track"><div class="ob-progress-fill" id="ob-progress" style="width:25%"></div></div>
+    <div class="ob-top-row"><div class="ob-handle"></div><button class="ob-skip" id="ob-skip">Overslaan</button></div>
+    <div class="ob-viewport" id="ob-viewport">
+      <div class="ob-track" id="ob-track">
+        <div class="ob-slide ob-active">
+          <div class="ob-icon-wrap">
+            <svg width="54" height="54" viewBox="0 0 52 52" fill="none">
+              <g class="ob-cam-rays"><line x1="26" y1="5" x2="26" y2="1" stroke="#e67026" stroke-width="2" stroke-linecap="round"/><line x1="39" y1="9" x2="42" y2="6" stroke="#e67026" stroke-width="2" stroke-linecap="round"/><line x1="47" y1="22" x2="51" y2="22" stroke="#e67026" stroke-width="2" stroke-linecap="round"/></g>
+              <rect x="6" y="14" width="40" height="28" rx="5" fill="rgba(230,112,38,.08)" stroke="#e67026" stroke-width="2"/>
+              <path d="M18 14v-3a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3" fill="rgba(230,112,38,.08)" stroke="#e67026" stroke-width="2"/>
+              <circle cx="26" cy="28" r="9" fill="rgba(230,112,38,.06)" stroke="#e67026" stroke-width="2"/>
+              <circle class="ob-cam-lens" cx="26" cy="28" r="5" fill="rgba(230,112,38,.28)" stroke="#e67026" stroke-width="1.5"/>
+              <circle cx="39" cy="20" r="2.5" fill="rgba(230,112,38,.45)"/>
+            </svg>
+          </div>
+          <div class="ob-step-label">Stap 1 van 4</div>
+          <div class="ob-title">Fotografeer je goede spullen</div>
+          <div class="ob-desc">Heb je spullen die nog goed zijn maar weg moeten? Maak gewoon een foto — meubels, gereedschap, materialen, noem maar op.</div>
+        </div>
+        <div class="ob-slide">
+          <div class="ob-icon-wrap">
+            <svg width="54" height="54" viewBox="0 0 52 52" fill="none">
+              <rect x="10" y="4" width="28" height="36" rx="4" fill="rgba(230,112,38,.06)" stroke="#e67026" stroke-width="2"/>
+              <line x1="16" y1="16" x2="32" y2="16" stroke="#e4ddd5" stroke-width="2" stroke-linecap="round"/>
+              <line x1="16" y1="23" x2="32" y2="23" stroke="#e4ddd5" stroke-width="2" stroke-linecap="round"/>
+              <line x1="16" y1="30" x2="26" y2="30" stroke="#e4ddd5" stroke-width="2" stroke-linecap="round"/>
+              <rect class="ob-scanglow" x="10" y="13" width="28" height="7" fill="rgba(230,112,38,.15)" rx="1"/>
+              <line class="ob-scanline" x1="10" y1="16" x2="38" y2="16" stroke="#e67026" stroke-width="2.5" stroke-linecap="round"/>
+              <g class="ob-aibadge"><circle cx="40" cy="40" r="10" fill="#e67026"/><polyline points="35,40 38.5,43.5 45,36.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></g>
+            </svg>
+          </div>
+          <div class="ob-step-label">Stap 2 van 4</div>
+          <div class="ob-title">AI herkent het direct</div>
+          <div class="ob-desc">Onze AI analyseert de foto automatisch en bepaalt wat het is, hoeveel het weegt en of het geschikt is.</div>
+        </div>
+        <div class="ob-slide">
+          <div class="ob-icon-wrap">
+            <svg width="54" height="54" viewBox="0 0 52 52" fill="none">
+              <circle class="ob-ping ob-ping1" cx="26" cy="26" r="10" stroke="#e67026" fill="none" stroke-width="2.5"/>
+              <circle class="ob-ping ob-ping2" cx="26" cy="26" r="10" stroke="#e67026" fill="none" stroke-width="2.5"/>
+              <circle cx="26" cy="20" r="6" fill="rgba(230,112,38,.12)" stroke="#e67026" stroke-width="2"/>
+              <path d="M14 40c0-6.6 5.4-12 12-12s12 5.4 12 12" stroke="#e67026" stroke-width="2" stroke-linecap="round" fill="none"/>
+              <g class="ob-notif"><circle cx="37" cy="14" r="7" fill="#e67026"/><text x="37" y="18" text-anchor="middle" fill="white" font-size="9" font-weight="bold" font-family="Inter,sans-serif">!</text></g>
+            </svg>
+          </div>
+          <div class="ob-step-label">Stap 3 van 4</div>
+          <div class="ob-title">Bedrijven worden gematcht</div>
+          <div class="ob-desc">Lokale afnemers in jouw netwerk zien het aanbod direct en kunnen aangeven of ze het willen hebben.</div>
+        </div>
+        <div class="ob-slide">
+          <div class="ob-icon-wrap" style="background:rgba(76,175,80,.1);">
+            <svg width="54" height="54" viewBox="0 0 52 52" fill="none">
+              <circle class="ob-circle" cx="26" cy="26" r="20" stroke="#4caf50" stroke-width="2.5" fill="rgba(76,175,80,.08)"/>
+              <polyline class="ob-check" points="14,26 22,34 38,18" stroke="#4caf50" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+          </div>
+          <div class="ob-step-label" style="color:#4caf50;">Stap 4 van 4</div>
+          <div class="ob-title">Materiaal krijgt een tweede leven</div>
+          <div class="ob-desc">Ophaling wordt geregeld en jouw restmateriaal wordt hergebruikt. Minder afval, meer waarde.</div>
+        </div>
+      </div>
+    </div>
+    <div class="ob-dots" id="ob-dots">
+      <div class="ob-dot active" data-i="0"></div><div class="ob-dot" data-i="1"></div><div class="ob-dot" data-i="2"></div><div class="ob-dot" data-i="3"></div>
+    </div>
+    <div class="ob-actions">
+      <button class="ob-next" id="ob-next">Volgende</button>
+      <button class="ob-back" id="ob-back" style="visibility:hidden;">← Terug</button>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const total = 4; let current = 0, dragging = false, dragStartX = 0, dragDelta = 0;
+      const backdrop = document.getElementById('ob-backdrop'), sheet = document.getElementById('ob-sheet'),
+            track = document.getElementById('ob-track'), viewport = document.getElementById('ob-viewport'),
+            progress = document.getElementById('ob-progress'),
+            dots = document.getElementById('ob-dots').querySelectorAll('.ob-dot'),
+            slides = track.querySelectorAll('.ob-slide'),
+            nextBtn = document.getElementById('ob-next'), backBtn = document.getElementById('ob-back'),
+            skipBtn = document.getElementById('ob-skip');
+      window.onboardingOpen = function () { goTo(0, false); backdrop.classList.add('ob-show'); sheet.classList.add('ob-show'); };
+      function onboardingClose() { backdrop.classList.remove('ob-show'); sheet.classList.remove('ob-show'); }
+      function goTo(idx, animated) {
+        current = Math.max(0, Math.min(total - 1, idx));
+        track.classList.toggle('ob-animated', animated);
+        track.style.transform = 'translateX(-' + (current * 100) + '%)';
+        progress.style.width = ((current + 1) / total * 100) + '%';
+        dots.forEach((d, i) => d.classList.toggle('active', i === current));
+        slides.forEach((s, i) => { s.classList.remove('ob-active'); if (i === current) { void s.offsetWidth; s.classList.add('ob-active'); } });
+        backBtn.style.visibility = current > 0 ? 'visible' : 'hidden';
+        nextBtn.textContent = current === total - 1 ? 'Aan de slag →' : 'Volgende';
+      }
+      nextBtn.addEventListener('click', function () { if (current < total - 1) goTo(current + 1, true); else onboardingClose(); });
+      backBtn.addEventListener('click', function () { goTo(current - 1, true); });
+      skipBtn.addEventListener('click', onboardingClose);
+      backdrop.addEventListener('click', onboardingClose);
+      dots.forEach(d => d.addEventListener('click', function () { goTo(parseInt(d.dataset.i), true); }));
+      viewport.addEventListener('touchstart', function (e) { dragging = true; dragStartX = e.touches[0].clientX; dragDelta = 0; track.classList.remove('ob-animated'); }, { passive: true });
+      viewport.addEventListener('touchmove', function (e) { if (!dragging) return; dragDelta = e.touches[0].clientX - dragStartX; track.style.transform = 'translateX(' + (-(current * viewport.offsetWidth) + dragDelta) + 'px)'; }, { passive: true });
+      viewport.addEventListener('touchend', function () { if (!dragging) return; dragging = false; const t = viewport.offsetWidth * 0.28; if (dragDelta < -t && current < total - 1) goTo(current + 1, true); else if (dragDelta > t && current > 0) goTo(current - 1, true); else goTo(current, true); });
+    })();
+  </script>
+
+  <script>
+    window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); });
+  </script>
+  <script src="/static/ux.js"></script>
+</body>
+</html>

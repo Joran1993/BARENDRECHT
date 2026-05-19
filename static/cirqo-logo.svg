@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 90" width="110" height="45">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#6ECBB8"/>
+      <stop offset="100%" stop-color="#6DC6E8"/>
+    </linearGradient>
+  </defs>
+  <rect width="220" height="90" rx="22" fill="url(#bg)"/>
+  <text
+    x="16" y="68"
+    font-family="Arial Black, Arial, sans-serif"
+    font-weight="900"
+    font-size="62"
+    fill="#2D2E2D"
+    letter-spacing="-1"
+  >CirQo</text>
+  <!-- rode cursor/pijl op de Q (x≈147 is midden van de Q opening) -->
+  <polygon points="147,62 139,82 147,75 155,82" fill="#E02010"/>
+</svg>

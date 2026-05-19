@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="icon" href="/static/favicon.ico">
+  <link rel="apple-touch-icon" href="/static/icon-bouwkringloop-192.png">
+  <title>Aanbiedingen — De Bouwkringloop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="/static/base.css?v=5">
+  <style>
+    body { display: flex; flex-direction: column; min-height: 100dvh; }
+
+    /* ── Login scherm ── */
+    .login-wrap {
+      flex: 1; display: flex; flex-direction: column;
+      justify-content: center;
+      padding: calc(env(safe-area-inset-top) + 32px) 16px
+               calc(env(safe-area-inset-bottom) + 32px);
+    }
+    .login-inner { width: 100%; max-width: 400px; margin: 0 auto; }
+    .brand { margin-bottom: 28px; }
+    .brand-name {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2rem; font-weight: 900;
+    }
+    .brand-sub {
+      font-size: 0.65rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.12em;
+      color: var(--orange); margin-top: 4px;
+    }
+    .panel {
+      background: #fff; border: 1px solid var(--border);
+      border-radius: 16px; padding: 24px 20px;
+    }
+    .panel h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.6rem; font-weight: 900; margin-bottom: 20px;
+    }
+
+    /* ── Aanbiedingen scherm ── */
+    .page-content {
+      flex: 1; overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      background: var(--bg);
+      padding: 16px;
+      padding-bottom: calc(env(safe-area-inset-bottom) + 16px);
+    }
+
+    .filter-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+    .filter-btn {
+      padding: 5px 14px;
+      border: 1px solid var(--border); border-radius: 100px;
+      background: none; font-family: 'Inter', sans-serif;
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--muted); cursor: pointer;
+      transition: all 0.15s;
+    }
+    .filter-btn.active { color: var(--orange); border-color: var(--orange); background: rgba(240,120,32,0.06); }
+
+    .aanbieding-card {
+      background: #fff; border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden; margin-bottom: 12px;
+    }
+    .aanbieding-card.ophalen { border-left: 4px solid #81c784; }
+    .aanbieding-card.niet_nodig { opacity: 0.5; }
+    .card-img { width: 100%; max-height: 200px; object-fit: cover; display: block; }
+    .card-body { padding: 14px; }
+    .card-label {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.3rem; font-weight: 900; margin-bottom: 4px;
+    }
+    .card-meta { font-size: 0.78rem; color: var(--muted); margin-bottom: 6px; line-height: 1.5; }
+    .card-detail { font-size: 0.82rem; color: var(--muted); margin-bottom: 12px; line-height: 1.5; }
+    .card-status {
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; margin-bottom: 10px; display: block;
+    }
+    .status-open { color: var(--orange); }
+    .status-ophalen { color: #4caf50; }
+    .status-niet_nodig { color: var(--muted); }
+    .card-actions { display: flex; gap: 8px; }
+    .btn-ophalen {
+      flex: 1; padding: 12px; background: #4caf50; color: #fff;
+      border: none; border-radius: 100px;
+      font-family: 'Inter', sans-serif; font-size: 0.78rem;
+      font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .btn-ophalen:hover { background: #388e3c; }
+    .btn-niet-nodig {
+      flex: 1; padding: 12px; background: none;
+      border: 1px solid var(--border); border-radius: 100px; color: var(--muted);
+      font-family: 'Inter', sans-serif; font-size: 0.78rem;
+      font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .btn-niet-nodig:hover { border-color: var(--danger); color: var(--danger); }
+    .empty { text-align: center; padding: 40px 0; color: var(--muted); font-size: 0.9rem; }
+
+    /* ── Tab navigatie ── */
+    .tab-bar {
+      display: flex; border-bottom: 1px solid var(--border);
+      background: #fff; flex-shrink: 0;
+    }
+    .tab-btn {
+      flex: 1; padding: 12px 8px; border: none; background: none;
+      font-family: 'Inter', sans-serif; font-size: 0.72rem;
+      font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em;
+      color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent;
+      transition: all 0.15s; margin-bottom: -1px;
+    }
+    .tab-btn.active { color: var(--orange); border-bottom-color: var(--orange); }
+
+    /* ── Netwerk pagina ── */
+    .netwerk-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    .netwerk-kaart {
+      background: #fff; border: 1px solid var(--border);
+      border-radius: 14px; padding: 16px 14px;
+    }
+    .netwerk-kaart.eigen { border-color: var(--orange); background: rgba(91,140,108,0.04); }
+    .netwerk-naam {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.15rem; font-weight: 900; line-height: 1.2;
+      margin-bottom: 6px;
+    }
+    .netwerk-eigen-badge {
+      display: inline-block; font-size: 0.6rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      background: var(--orange); color: #fff;
+      border-radius: 100px; padding: 2px 8px; margin-bottom: 6px;
+    }
+    .netwerk-cat {
+      display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px;
+    }
+    .netwerk-cat-tag {
+      font-size: 0.62rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.05em; background: var(--surface);
+      color: var(--muted); border-radius: 100px; padding: 2px 8px;
+    }
+    .netwerk-contact {
+      font-size: 0.72rem; color: var(--muted); margin-top: 8px;
+      word-break: break-all;
+    }
+    .netwerk-teller {
+      font-size: 0.68rem; font-weight: 700; color: var(--orange);
+      margin-top: 6px;
+    }
+  </style>
+  <link rel="stylesheet" href="/brand.css">
+  <link rel="stylesheet" href="/static/ux.css">
+</head>
+<body>
+
+  <!-- Login scherm -->
+  <div id="login-scherm" class="login-wrap">
+    <div class="login-inner">
+      <div class="brand">
+        <img src="/static/bouwkringloop-logo.jpg" alt="De Bouwkringloop" style="height:32px;max-width:200px;width:auto;margin:0 auto 8px;display:block;object-fit:contain;">
+        <div class="brand-sub">Bedrijfsportaal</div>
+      </div>
+      <div class="panel">
+        <h1>Inloggen</h1>
+        <form id="login-form">
+          <div class="field">
+            <label>Gebruikersnaam</label>
+            <input type="text" id="login-username" autocomplete="username" required>
+          </div>
+          <div class="field">
+            <label>Wachtwoord</label>
+            <input type="password" id="login-password" autocomplete="current-password" required>
+          </div>
+          <button type="submit" id="login-btn" class="btn btn-primary">Inloggen</button>
+          <div class="error-bar" id="login-err"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Aanbiedingen scherm -->
+  <div id="app-scherm" style="display:none;flex:1;flex-direction:column;">
+    <header class="hdr">
+      <img src="/static/bouwkringloop-logo.jpg" class="hdr-logo-img" alt="De Bouwkringloop" id="hdr-naam" style="position:static;transform:none;">
+      <div class="hdr-actions">
+        <button class="hdr-btn" id="push-btn" onclick="meldingInschakelen()" style="display:flex;align-items:center;gap:5px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          Meldingen
+        </button>
+        <button class="hdr-btn danger" onclick="uitloggen()">Uitloggen</button>
+      </div>
+    </header>
+
+    <div class="tab-bar">
+      <button class="tab-btn active" id="tab-aanbiedingen" onclick="setTab('aanbiedingen')">Aanbiedingen</button>
+      <button class="tab-btn" id="tab-netwerk" onclick="setTab('netwerk')">Netwerk</button>
+    </div>
+
+    <!-- Aanbiedingen tab -->
+    <div id="panel-aanbiedingen" class="page-content">
+      <div class="filter-row">
+        <button class="filter-btn active" data-status="open" onclick="setFilter('open')">Open</button>
+        <button class="filter-btn" data-status="ophalen" onclick="setFilter('ophalen')">Ophalen</button>
+        <button class="filter-btn" data-status="niet_nodig" onclick="setFilter('niet_nodig')">Niet nodig</button>
+        <button class="filter-btn" data-status="alle" onclick="setFilter('alle')">Alle</button>
+      </div>
+      <div id="aanbiedingen-list"></div>
+    </div>
+
+    <!-- Netwerk tab -->
+    <div id="panel-netwerk" class="page-content" style="display:none;">
+      <p style="font-size:0.78rem;color:var(--muted);margin-bottom:16px;line-height:1.5;">
+        Alle deelnemers in jouw lokale netwerk. Zie je iets wat jij kunt gebruiken? Stuur een bericht of wacht op aanbiedingen.
+      </p>
+      <div class="netwerk-grid" id="netwerk-grid"></div>
+    </div>
+  </div>
+
+  <script>
+    // Accepteer zowel bedrijf_token (oud) als standaard token (nieuw via /login)
+    let token = localStorage.getItem("bedrijf_token") || localStorage.getItem("token");
+    if (token && localStorage.getItem("role") === "bedrijf" && !localStorage.getItem("bedrijf_naam")) {
+      localStorage.setItem("bedrijf_naam", localStorage.getItem("organisatie") || localStorage.getItem("username") || "");
+    }
+    let alleAanbiedingen = [];
+    let huidigFilter = "open";
+
+    // Auto-login via token in URL (/bedrijf/{token})
+    const urlToken = location.pathname.split("/bedrijf/")[1];
+    if (urlToken && !token) {
+      fetch(`/api/auth/bedrijf-token/${urlToken}`)
+        .then(r => r.ok ? r.json() : Promise.reject())
+        .then(data => {
+          localStorage.setItem("bedrijf_token", data.token);
+          localStorage.setItem("bedrijf_naam", data.username);
+          token = data.token;
+          toonApp();
+        })
+        .catch(() => { /* Ongeldige token, toon loginscherm */ });
+    } else if (token) {
+      toonApp();
+    } else {
+      // Geen token → doorsturen naar centrale login
+      location.href = "/login?redirect=/bedrijf";
+    }
+
+    // ── Login ──────────────────────────────────────────────────────────────────
+    document.getElementById("login-form").addEventListener("submit", async e => {
+      e.preventDefault();
+      const btn = document.getElementById("login-btn");
+      const err = document.getElementById("login-err");
+      btn.disabled = true; btn.textContent = "Bezig…"; err.style.display = "none";
+
+      const fd = new FormData();
+      fd.append("username", document.getElementById("login-username").value);
+      fd.append("password", document.getElementById("login-password").value);
+
+      try {
+        const res = await fetch("/api/auth/login", { method: "POST", body: fd });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Fout");
+        if (data.role !== "bedrijf") throw new Error("Dit account heeft geen toegang tot het bedrijfsportaal");
+        localStorage.setItem("bedrijf_token", data.token);
+        localStorage.setItem("bedrijf_naam", data.username);
+        token = data.token;
+        toonApp();
+      } catch (ex) {
+        err.textContent = ex.message; err.style.display = "block";
+        btn.disabled = false; btn.textContent = "Inloggen";
+      }
+    });
+
+    function uitloggen() {
+      localStorage.clear();
+      token = null;
+      location.href = "/login";
+    }
+
+    let huidigTab = "aanbiedingen";
+    let netwerkGeladen = false;
+
+    function setTab(tab) {
+      huidigTab = tab;
+      document.getElementById("tab-aanbiedingen").classList.toggle("active", tab === "aanbiedingen");
+      document.getElementById("tab-netwerk").classList.toggle("active", tab === "netwerk");
+      document.getElementById("panel-aanbiedingen").style.display = tab === "aanbiedingen" ? "" : "none";
+      document.getElementById("panel-netwerk").style.display = tab === "netwerk" ? "" : "none";
+      if (tab === "netwerk" && !netwerkGeladen) laadNetwerk();
+    }
+
+    function toonApp() {
+      document.getElementById("login-scherm").style.display = "none";
+      const app = document.getElementById("app-scherm");
+      app.style.display = "flex";
+      app.style.flexDirection = "column";
+      const naam = localStorage.getItem("bedrijf_naam")
+        || localStorage.getItem("organisatie")
+        || localStorage.getItem("username")
+        || "Bedrijfsportaal";
+      document.getElementById("hdr-naam").textContent = naam;
+      laadAanbiedingen();
+      registreerPush();
+    }
+
+    // ── Push notificaties ──────────────────────────────────────────────────────
+    let swReg = null;
+
+    async function registreerPush() {
+      if (!("serviceWorker" in navigator)) return;
+      try {
+        swReg = await navigator.serviceWorker.register("/sw.js");
+        if (Notification.permission === "granted" && "PushManager" in window) {
+          await abonneerPush();
+        }
+      } catch (e) {
+        console.warn("[push] SW registratie mislukt:", e);
+      }
+    }
+
+    async function meldingInschakelen() {
+      const btn = document.getElementById("push-btn");
+      if (!("Notification" in window)) {
+        alert("Deze browser ondersteunt geen meldingen. Probeer Chrome of voeg de app toe aan je beginscherm.");
+        return;
+      }
+      btn.textContent = "Bezig…"; btn.disabled = true;
+      try {
+        const perm = await Notification.requestPermission();
+        if (perm === "granted") {
+          if (!("PushManager" in window)) {
+            alert("Push meldingen worden niet ondersteund. Voeg de app toe aan je beginscherm (PWA) en probeer opnieuw.");
+            btn.textContent = "Meldingen"; btn.disabled = false;
+            return;
+          }
+          await abonneerPush();
+          btn.textContent = "✓ Aan";
+          btn.style.color = "#2e7d32";
+          btn.disabled = true;
+        } else {
+          btn.textContent = "Geblokkeerd";
+          btn.disabled = false;
+        }
+      } catch (e) {
+        console.warn("[push] Fout:", e);
+        alert("Fout: " + e.message);
+        btn.textContent = "Meldingen"; btn.disabled = false;
+      }
+    }
+
+    async function abonneerPush() {
+      if (!swReg) swReg = await navigator.serviceWorker.ready;
+      const keyRes = await fetch("/api/push/vapid-key");
+      const { public_key } = await keyRes.json();
+      const sub = await swReg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(public_key),
+      });
+      await apiFetch("/api/push/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subscription: sub.toJSON() }),
+      });
+    }
+
+    function urlBase64ToUint8Array(base64String) {
+      const padding = "=".repeat((4 - base64String.length % 4) % 4);
+      const base64  = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+      const raw     = atob(base64);
+      return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+    }
+
+    // ── API ────────────────────────────────────────────────────────────────────
+    async function apiFetch(url, opts = {}) {
+      const res = await fetch(url, {
+        ...opts,
+        headers: { Authorization: `Bearer ${token}`, ...(opts.headers || {}) }
+      });
+      if (res.status === 401) { uitloggen(); return null; }
+      return res;
+    }
+
+    async function laadAanbiedingen() {
+      const res = await apiFetch("/api/mijn-aanbiedingen");
+      if (!res) return;
+      alleAanbiedingen = await res.json();
+      renderAanbiedingen();
+    }
+
+    // ── Filter & render ────────────────────────────────────────────────────────
+    function setFilter(status) {
+      huidigFilter = status;
+      document.querySelectorAll(".filter-btn").forEach(b =>
+        b.classList.toggle("active", b.dataset.status === status));
+      renderAanbiedingen();
+    }
+
+    function renderAanbiedingen() {
+      const gefilterd = huidigFilter === "alle"
+        ? alleAanbiedingen
+        : alleAanbiedingen.filter(a => a.status === huidigFilter);
+
+      const list = document.getElementById("aanbiedingen-list");
+      if (!gefilterd.length) {
+        list.innerHTML = `<div class="empty">Geen aanbiedingen${huidigFilter !== "alle" ? " in dit filter" : ""}.</div>`;
+        return;
+      }
+
+      const statusLabel = { open: "Open", ophalen: "Wordt opgehaald", niet_nodig: "Niet nodig" };
+      const statusCls   = { open: "status-open", ophalen: "status-ophalen", niet_nodig: "status-niet_nodig" };
+
+      list.innerHTML = gefilterd.map(a => {
+        const datum = new Date(a.created_at).toLocaleDateString("nl-NL",
+          { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+        return `
+          <div class="aanbieding-card ${a.status}" id="card-${a.id}">
+            ${a.photo_url ? `<img class="card-img" src="${a.photo_url}" alt="" loading="lazy">` : ""}
+            <div class="card-body">
+              <div class="card-label">${a.ai_label || "Onbekend materiaal"}</div>
+              <div class="card-meta">
+                ${a.gewicht_kg != null ? `${a.gewicht_kg} kg · ` : ""}${a.category || ""}${a.gemeente ? ` · ${a.gemeente}` : ""} · ${datum}
+              </div>
+              ${a.ai_detail ? `<div class="card-detail">${a.ai_detail}</div>` : ""}
+              <span class="card-status ${statusCls[a.status] || ""}">${statusLabel[a.status] || a.status}</span>
+              ${a.status === "open" ? `
+                <div class="card-actions">
+                  <button class="btn-ophalen" onclick="reageer(${a.id}, 'ophalen')">Ophalen</button>
+                  <button class="btn-niet-nodig" onclick="reageer(${a.id}, 'niet_nodig')">Niet nodig</button>
+                </div>` : ""}
+            </div>
+          </div>`;
+      }).join("");
+    }
+
+    async function reageer(id, status) {
+      const fd = new FormData();
+      fd.append("status", status);
+      const res = await apiFetch(`/api/mijn-aanbiedingen/${id}`, { method: "PATCH", body: fd });
+      if (!res || !res.ok) { alert("Fout bij opslaan"); return; }
+      const a = alleAanbiedingen.find(x => x.id === id);
+      if (a) a.status = status;
+      renderAanbiedingen();
+    }
+
+    async function laadNetwerk() {
+      netwerkGeladen = true;
+      const grid = document.getElementById("netwerk-grid");
+      grid.innerHTML = '<p style="color:var(--muted);font-size:0.85rem;">Laden…</p>';
+      const res = await apiFetch("/api/deelnemers");
+      if (!res || !res.ok) { grid.innerHTML = '<p style="color:var(--muted)">Kon netwerk niet laden.</p>'; return; }
+      const data = await res.json();
+      const eigenNaam = localStorage.getItem("bedrijf_naam") || "";
+
+      if (!data.bedrijven.length) {
+        grid.innerHTML = '<p style="color:var(--muted)">Nog geen andere deelnemers.</p>';
+        return;
+      }
+
+      grid.innerHTML = data.bedrijven.map(b => {
+        const eigen = b.naam === eigenNaam;
+        const cats = (b.categorieen || []).slice(0, 4);
+        return `
+          <div class="netwerk-kaart${eigen ? " eigen" : ""}">
+            ${eigen ? '<span class="netwerk-eigen-badge">Jouw organisatie</span>' : ""}
+            <div class="netwerk-naam">${b.naam}</div>
+            <div class="netwerk-contact">${b.email || ""}</div>
+            ${cats.length ? `<div class="netwerk-cat">${cats.map(c => `<span class="netwerk-cat-tag">${c}</span>`).join("")}</div>` : ""}
+            ${b.aanbieding_count > 0 ? `<div class="netwerk-teller">${b.aanbieding_count} aanbieding${b.aanbieding_count !== 1 ? "en" : ""}</div>` : ""}
+          </div>`;
+      }).join("");
+    }
+
+    // Ververst elke 5s als ingelogd
+    setInterval(() => { if (token) laadAanbiedingen(); }, 5000);
+  </script>
+  <script src="/static/ux.js"></script>
+</body>
+</html>

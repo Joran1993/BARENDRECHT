@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="icon" href="/static/icon-cirqo-192.png">
+  <link rel="apple-touch-icon" href="/static/icon-cirqo-192.png">
+  <title>Beheer — CIRQO</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="/static/base.css?v=5">
+  <link rel="stylesheet" href="/static/beheer.css?v=3">
+  <link rel="stylesheet" href="/brand.css">
+  <link rel="stylesheet" href="/static/ux.css">
+  <script>
+    (function() {
+      var r = localStorage.getItem('role');
+      if (r !== 'superadmin') { location.replace('/'); throw new Error('Geen toegang'); }
+      document.documentElement.style.visibility = 'hidden';
+    })();
+  </script>
+</head>
+<body>
+
+  <header class="hdr">
+    <img src="/static/bouwkringloop-logo.jpg" class="hdr-logo-img" alt="De Bouwkringloop">
+    <div class="hdr-actions">
+      <a href="/" class="hdr-btn">Scannen</a>
+      <button class="hdr-btn danger" onclick="logout()">Uitloggen</button>
+    </div>
+  </header>
+
+  <nav class="tabbar">
+    <button class="tabbar-btn active" data-tab="gebruikers">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <small>Gebruikers</small>
+    </button>
+    <button class="tabbar-btn" data-tab="bedrijven">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+      <small>Bedrijven</small>
+    </button>
+    <button class="tabbar-btn" data-tab="inzamellijst">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      <small>Inzamellijst</small>
+    </button>
+    <button class="tabbar-btn" data-tab="gemeenten" id="tab-gemeenten-btn" style="display:none;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <small>Gemeenten</small>
+    </button>
+  </nav>
+
+  <!-- Gebruikers tab -->
+  <section class="tab active" id="tab-gebruikers">
+    <div class="section-card">
+      <div class="section-title">Nieuwe gebruiker</div>
+      <div class="field"><label>Gebruikersnaam</label><input type="text" id="nu-username" autocomplete="off"></div>
+      <div class="field"><label>Wachtwoord</label><input type="password" id="nu-password"></div>
+      <div class="field" id="nu-gemeente-field">
+        <label>Gemeente</label>
+        <select id="nu-gemeente"><option value="">— Selecteer —</option></select>
+      </div>
+      <div class="field">
+        <label>Rol</label>
+        <select id="nu-rol">
+          <option value="user">Scanner</option>
+          <option value="admin">Gemeente-beheerder</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="gebruikerToevoegen()">Gebruiker aanmaken</button>
+      <div class="error-bar" id="nu-fout"></div>
+    </div>
+
+    <div id="users-list"></div>
+  </section>
+
+  <!-- Bedrijven tab -->
+  <section class="tab" id="tab-bedrijven">
+    <div class="section-card">
+      <div class="section-title">Bedrijf toevoegen</div>
+      <div class="field"><label>Bedrijfsnaam</label><input type="text" id="nb-naam" placeholder="bijv. Hout Recycling BV"></div>
+      <div class="field" id="nb-gemeente-field">
+        <label>Gemeente</label>
+        <input type="text" id="nb-gemeente" placeholder="bijv. Amsterdam">
+      </div>
+      <div class="field"><label>Contactpersoon</label><input type="text" id="nb-contact" placeholder="Jan de Vries"></div>
+      <div class="field"><label>E-mail</label><input type="email" id="nb-email" placeholder="info@bedrijf.nl"></div>
+      <div class="field"><label>Telefoon</label><input type="tel" id="nb-tel" placeholder="06-12345678"></div>
+      <div class="field">
+        <label>Categorieën (wat nemen ze af?)</label>
+        <div id="nb-cats" class="cat-checkboxes"></div>
+      </div>
+      <div style="margin:16px 0 8px;font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);">Login voor bedrijf</div>
+      <div class="field"><label>Gebruikersnaam</label><input type="text" id="nb-login-username" placeholder="bijv. houtrecycling-bv" autocomplete="off"></div>
+      <div class="field"><label>Wachtwoord</label><input type="password" id="nb-login-password" placeholder="sterk wachtwoord"></div>
+      <button class="btn btn-primary" onclick="bedrijfToevoegen()">Bedrijf aanmaken</button>
+      <div class="error-bar" id="nb-fout"></div>
+    </div>
+    <div id="bedrijven-list"></div>
+  </section>
+
+  <!-- Inzamellijst tab -->
+  <section class="tab" id="tab-inzamellijst">
+    <div class="section-card">
+      <div class="section-title">Inzamellijst beheren</div>
+      <p style="font-size:0.8rem;color:var(--muted);margin-bottom:12px;">
+        Vink aan welke producten de container accepteert. De AI geeft bij het scannen automatisch groen of rood terug.
+      </p>
+      <div id="il-gemeente-field" class="field" style="display:none;">
+        <label>Gemeente</label>
+        <select id="il-gemeente"><option value="">— Selecteer —</option></select>
+      </div>
+      <div class="error-bar" id="il-fout"></div>
+      <div class="il-save-bar"><span id="il-save-status" class="il-save-status"></span></div>
+    </div>
+    <div id="inzamellijst-list"></div>
+  </section>
+
+  <!-- Gemeenten tab (alleen superadmin) -->
+  <section class="tab" id="tab-gemeenten">
+    <div class="section-card">
+      <div class="section-title">Nieuwe gemeente</div>
+      <div class="field"><label>Naam gemeente</label><input type="text" id="ng-naam" placeholder="bijv. Amsterdam"></div>
+      <div class="field"><label>Beheerder gebruikersnaam</label><input type="text" id="ng-admin" placeholder="amsterdam-admin"></div>
+      <div class="field"><label>Wachtwoord beheerder</label><input type="password" id="ng-pwd"></div>
+      <button class="btn btn-primary" onclick="gemeenteToevoegen()">Gemeente aanmaken</button>
+      <div class="error-bar" id="ng-fout"></div>
+    </div>
+
+    <div id="gemeenten-list"></div>
+
+    <div class="section-card" style="margin-top:16px;">
+      <div class="section-title">Gewichten heranalyseren</div>
+      <p style="font-size:0.8rem;color:var(--muted);margin-bottom:12px;">Heranalyseer gewichten van alle items in een gemeente met het beste AI-model. Duurt ~5 minuten.</p>
+      <div class="field">
+        <label>Gemeente</label>
+        <select id="heranalyse-gemeente">
+          <option value="Almere">Almere</option>
+          <option value="Amsterdam">Amsterdam</option>
+          <option value="Hardinxveld-Giessendam">Hardinxveld-Giessendam</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="heranalyseerGewichten()" id="heranalyse-btn">Start heranalyse</button>
+      <div class="error-bar" id="heranalyse-status" style="display:none;background:#e8f5e9;color:#2e7d32;border-color:#c8e6c9;"></div>
+    </div>
+  </section>
+
+  <!-- Gemeente detail panel -->
+  <div id="gemeente-detail" class="gd-panel">
+    <div class="gd-header">
+      <button class="hdr-btn" onclick="closeGemeenteDashboard()">← Terug</button>
+      <span id="gd-naam" class="gd-title"></span>
+      <span></span>
+    </div>
+    <div id="gd-body" class="gd-content"></div>
+  </div>
+
+  <script src="/static/beheer.js?v=12"></script>
+  <script src="/static/ux.js"></script>
+</body>
+</html>

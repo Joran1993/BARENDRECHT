@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="CIRQO">
+  <meta name="theme-color" content="#e67026">
+  <link rel="manifest" href="/static/manifest.json">
+  <link rel="icon" href="/static/icon-cirqo-192.png">
+  <link rel="apple-touch-icon" href="/static/icon-cirqo-192.png">
+  <title>CIRQO</title>
+  <link rel="preload" href="/static/bouwkringloop-logo.jpg" as="image">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="/static/base.css?v=5">
+  <link rel="stylesheet" href="/static/scan.css?v=26">
+  <link rel="stylesheet" href="/brand.css">
+  <script>
+    (function() {
+      var p = new URLSearchParams(location.search);
+      if (p.get('_imp_token')) {
+        localStorage.setItem('token',       p.get('_imp_token'));
+        localStorage.setItem('user_id',     p.get('_imp_user_id') || '');
+        localStorage.setItem('username',    p.get('_imp_username') || '');
+        localStorage.setItem('role',        p.get('_imp_role') || '');
+        localStorage.setItem('gemeente',    p.get('_imp_gemeente') || '');
+        localStorage.setItem('organisatie', p.get('_imp_organisatie') || '');
+        localStorage.setItem('bedrijf_id',  p.get('_imp_bedrijf_id') || '');
+        history.replaceState(null, '', '/');
+      }
+      if (!localStorage.getItem('token')) { location.replace('/login?redirect=/'); } else { document.documentElement.style.visibility = 'hidden'; }
+    })();
+  </script>
+  <link rel="stylesheet" href="/static/ux.css">
+</head>
+<body>
+
+  <header class="hdr">
+    <img src="/static/bouwkringloop-logo.jpg" class="hdr-logo-img" alt="De Bouwkringloop">
+    <div class="hdr-actions">
+      <a href="/beheer" class="hdr-btn hidden" id="beheer-link">Beheer</a>
+      <button onclick="openUserPanel()" style="background:none;border:none;cursor:pointer;padding:6px;display:flex;align-items:center;gap:6px;color:var(--muted);" title="Account">
+        <span id="hdr-username" style="font-size:0.72rem;font-weight:600;"></span>
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <nav class="tabbar">
+    <button class="tabbar-btn active" data-tab="scan">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      <small>Scannen</small>
+    </button>
+    <button class="tabbar-btn" data-tab="list">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      <small>Aanbod</small>
+    </button>
+    <button class="tabbar-btn" data-tab="stats">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <small>Overzicht</small>
+    </button>
+  </nav>
+
+  <!-- Scan -->
+  <section class="tab active" id="tab-scan">
+    <div class="scan-hero" id="scan-hero">
+      <p class="scan-hero-intro">Check hier wie jouw overgebleven spullen wil ophalen</p>
+      <p class="scan-hero-title">Wat wil je aanbieden?</p>
+      <label class="scan-circle-btn" id="camera-label">
+        <input type="file" id="camera-input" accept="image/*" capture="environment">
+        <div class="scan-circle-inner">
+          <img src="data:image/webp;base64,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" alt="" class="scan-illustratie">
+        </div>
+      </label>
+      <button class="scan-hero-reacties-btn" onclick="document.querySelector('[data-tab=list]').click();setTimeout(()=>document.querySelector('[data-subtab=reacties]')?.click(),100)">Reacties</button>
+      <button onclick="onboardingOpen()" style="display:block;width:100%;margin-top:10px;background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:0.78rem;color:var(--muted);padding:4px;text-align:center;">Hoe werkt de app? →</button>
+    </div>
+
+    <div id="preview-wrap" class="preview-wrap hidden">
+      <img id="preview-img" src="" alt="">
+      <button id="preview-clear" class="preview-clear">&times;</button>
+    </div>
+    <p id="locatie-txt" class="locatie-txt hidden"></p>
+    <button id="analyse-btn" class="btn btn-primary analyse-btn hidden">
+      <span id="analyse-txt">Analyseren &amp; opslaan</span>
+    </button>
+    <div id="result-card" class="result-card hidden">
+      <div id="result-acceptatie" class="result-acceptatie hidden"></div>
+      <div id="result-label" class="result-label"></div>
+      <div id="result-weight" class="result-weight"></div>
+      <div id="result-co2" class="result-co2 hidden"></div>
+      <div id="result-detail" class="result-detail"></div>
+    </div>
+    <div id="scan-error" class="scan-error hidden"></div>
+    <div id="bedrijven-card" class="result-card hidden" style="border-top-color: #6DC4CE;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;">
+        <div class="result-label" style="font-size:1rem;margin:0;padding-top:6px;">Aanbieden aan</div>
+        <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;">
+          <select id="gemeente-kiezer" style="font-size:0.78rem;font-family:'Space Grotesk',sans-serif;border:1px solid var(--border);border-radius:8px;padding:4px 8px;background:var(--surface);color:var(--ink);max-width:150px;">
+            <option value="">Gemeente…</option>
+          </select>
+          <select id="milieustraat-kiezer" style="font-size:0.78rem;font-family:'Space Grotesk',sans-serif;border:1px solid var(--border);border-radius:8px;padding:4px 8px;background:var(--surface);color:var(--ink);max-width:150px;display:none;">
+            <option value="">Milieustraat…</option>
+          </select>
+        </div>
+      </div>
+      <div id="bedrijven-lijst"></div>
+    </div>
+  </section>
+
+  <!-- Lijst -->
+  <section class="tab" id="tab-list">
+    <div id="list-user-tabs">
+      <div class="list-maintabs">
+        <button class="list-maintab active" data-main="aanbieden">Aanbieden</button>
+        <button class="list-maintab" data-main="ontvangen">Ontvangen</button>
+      </div>
+      <div class="list-subtabs" id="subtabs-aanbieden">
+        <button class="list-subtab active" data-subtab="aangeboden">Door mij aangeboden</button>
+        <button class="list-subtab" data-subtab="reacties">Reacties</button>
+      </div>
+      <div class="list-subtabs" id="subtabs-ontvangen" style="display:none">
+        <button class="list-subtab active" data-subtab="ontvangen-alles">Aangeboden aan mij</button>
+        <button class="list-subtab" data-subtab="mijn-reacties">Mijn reacties</button>
+      </div>
+    </div>
+    <div id="list-admin-filter" style="display:none;padding:12px 16px;background:#fff;border-bottom:1px solid var(--border);">
+      <select id="admin-gemeente-select" style="width:100%;height:40px;border:1px solid var(--border);border-radius:8px;padding:0 12px;font-family:'Space Grotesk',sans-serif;font-size:0.9rem;background:var(--surface);color:var(--ink);">
+        <option value="">Alle gemeenten</option>
+      </select>
+    </div>
+    <div class="search-wrap">
+      <input type="search" id="search-input" placeholder="Zoeken…">
+    </div>
+    <div id="items-list"></div>
+  </section>
+
+  <!-- Overzicht -->
+  <section class="tab" id="tab-stats">
+    <div id="stats-gemeente-filter" style="display:none;padding:12px 16px 0;">
+      <select id="stats-gemeente-sel" class="stats-gemeente-sel">
+        <option value="">Alle gemeenten</option>
+      </select>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-box"><span id="s-total">–</span><small>Totaal items</small></div>
+      <div class="stat-box"><span id="s-today">–</span><small>Vandaag</small></div>
+      <div class="stat-box wide"><span id="s-kg">–</span><small>Totaal gewicht (kg)</small></div>
+      <div class="stat-box wide co2-box"><span id="s-co2">–</span><small>CO₂ bespaard (kg)</small></div>
+    </div>
+    <div id="gemeente-stats-list"></div>
+    <div id="deelnemers-list"></div>
+    <div id="netwerk-wrap" style="display:none;"></div>
+  </section>
+
+  <!-- Modal -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-sheet">
+      <button id="modal-close" class="modal-close">&times;</button>
+      <img id="modal-img" src="" alt="" class="modal-img">
+      <div class="modal-body">
+        <p id="modal-ts" class="modal-ts"></p>
+        <h3 id="modal-label"></h3>
+        <p id="modal-weight" class="modal-weight"></p>
+        <p id="modal-co2" class="modal-co2"></p>
+        <p id="modal-detail" class="modal-detail"></p>
+        <div id="modal-bewerk-velden">
+          <hr class="divider">
+          <div class="field"><label>Opmerking</label><textarea id="modal-note" rows="2"></textarea></div>
+          <div class="field">
+            <label>Categorie</label>
+            <select id="modal-cat">
+              <option value="">Geen</option>
+              <option>Hout</option><option>Metaal</option>
+              <option>Beton / steen</option><option>Glas</option>
+              <option>Kunststof</option><option>Gevaarlijk afval</option>
+              <option>Overig</option>
+            </select>
+          </div>
+        </div>
+        <!-- Bedrijf (ontvanger): aanbieder + reactieknoppen -->
+        <div id="modal-bedrijf-acties" style="display:none;">
+          <hr class="divider">
+          <p id="modal-aanbieder" style="font-size:0.78rem;font-weight:600;color:var(--muted);margin-bottom:4px;"></p>
+          <p id="modal-aanbieding-status" style="font-size:0.75rem;color:var(--orange);margin-bottom:16px;font-weight:700;"></p>
+          <div style="display:flex;gap:8px;">
+            <button id="modal-btn-ophalen" class="btn" style="flex:1;background:#4caf50;color:#fff;border-color:#4caf50;">✓ Ophalen</button>
+            <button id="modal-btn-niet-nodig" class="btn btn-ghost" style="flex:1;color:var(--danger);border-color:var(--danger);">✗ Niet nodig</button>
+          </div>
+        </div>
+        <!-- Aanbieder (scanner): terugkoppeling reactie, geen actieknoppen -->
+        <div id="modal-aanbieder-reactie" style="display:none;">
+          <hr class="divider">
+          <p style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:8px;">Reactie bedrijf</p>
+          <p id="modal-reactie-bedrijf" style="font-size:0.86rem;font-weight:600;margin-bottom:4px;"></p>
+          <p id="modal-reactie-status" style="font-size:0.78rem;font-weight:700;"></p>
+        </div>
+
+        <!-- Chat (gedeeld voor alle rollen) -->
+        <div id="modal-chat" style="display:none;">
+          <hr class="divider">
+          <p style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:12px;">Gesprek</p>
+          <div id="chat-berichten" class="chat-wrap"></div>
+          <div class="chat-input-row">
+            <input type="text" id="chat-input" placeholder="Typ een bericht…" maxlength="500">
+            <button class="chat-send" onclick="verstuurBericht()">Stuur</button>
+          </div>
+        </div>
+
+        <!-- Aanbiedingen (reacties van bedrijven, zichtbaar voor alle rollen) -->
+        <div id="modal-aanbiedingen" style="display:none;">
+          <hr class="divider">
+          <p style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:12px;">Reacties van bedrijven</p>
+          <div id="modal-aanbiedingen-list"></div>
+        </div>
+
+        <!-- Admin/scanner: bewerk-velden -->
+        <div id="modal-edit-acties">
+          <div class="modal-actions">
+            <button id="modal-save" class="btn btn-primary">Opslaan</button>
+            <button id="modal-del" class="btn btn-ghost" style="color:var(--danger);border-color:var(--danger)">Verwijderen</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Succes-overlay na aanbieden -->
+  <div id="succes-overlay" style="display:none;position:fixed;inset:0;z-index:999;background:var(--bg);flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;">
+    <div style="width:80px;height:80px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;margin-bottom:24px;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h2 id="succes-titel" style="font-family:'Barlow Condensed',sans-serif;font-size:1.9rem;font-weight:900;margin-bottom:8px;">Aangeboden!</h2>
+    <p id="succes-tekst" style="font-size:1rem;color:var(--muted);margin-bottom:32px;"></p>
+    <button onclick="sluitSucces()" class="btn btn-primary" style="width:100%;max-width:320px;">Doorgaan</button>
+  </div>
+
+  <!-- Gebruikerspaneel -->
+  <div id="user-panel" class="modal hidden">
+    <div class="modal-sheet">
+      <button class="modal-close" onclick="closeUserPanel()">&times;</button>
+      <div class="modal-body">
+        <h3 style="margin-bottom:12px;">Mijn account</h3>
+        <p id="up-rol-label" style="font-size:0.75rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);margin-bottom:20px;"></p>
+        <div class="field">
+          <label>Bedrijfsnaam</label>
+          <input type="text" id="up-organisatie" placeholder="bijv. Jansen Sloop" autocomplete="off">
+        </div>
+        <div class="field">
+          <label>Gemeente</label>
+          <select id="up-gemeente" style="width:100%;height:42px;border:1px solid var(--border);border-radius:10px;padding:0 12px;font-family:'Space Grotesk',sans-serif;font-size:0.9rem;background:var(--surface);color:var(--ink);">
+            <option value="">— Selecteer gemeente —</option>
+          </select>
+          <select id="up-milieustraat" style="width:100%;height:42px;border:1px solid var(--border);border-radius:10px;padding:0 12px;font-family:'Space Grotesk',sans-serif;font-size:0.9rem;background:var(--surface);color:var(--ink);margin-top:6px;display:none;">
+            <option value="">— Selecteer milieustraat —</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Pushmeldingen</label>
+          <button id="push-btn" class="btn btn-primary" onclick="meldingInschakelen()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:7px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;flex-shrink:0;"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            Meldingen inschakelen
+          </button>
+          <p id="push-status" style="font-size:0.78rem;color:var(--muted);margin-top:6px;display:none;"></p>
+        </div>
+        <div class="field" id="volgorde-wrap" style="display:none;">
+          <label>Volgorde bedrijven</label>
+          <p style="font-size:0.78rem;color:var(--muted);margin:4px 0 10px;">Stel in welk bedrijf het aanbod als eerste krijgt bij automatisch doorsturen.</p>
+          <div id="volgorde-lijst" style="display:flex;flex-direction:column;gap:6px;"></div>
+          <button class="btn btn-primary" onclick="slaVolgorde()" style="width:100%;margin-top:12px;">Volgorde opslaan</button>
+          <p id="volgorde-status" style="font-size:0.78rem;color:var(--muted);margin-top:6px;text-align:center;"></p>
+        </div>
+        <div class="field" id="auto-doorsturen-wrap">
+          <label>Automatisch doorsturen</label>
+          <div style="display:flex;align-items:center;gap:12px;margin-top:6px;">
+            <label class="toggle-switch">
+              <input type="checkbox" id="up-auto-doorsturen" onchange="saveAutoDoorsturen(this.checked)">
+              <span class="toggle-slider"></span>
+            </label>
+            <span style="font-size:0.8rem;color:var(--muted);">Bij "Niet nodig" automatisch aanbieden aan volgend bedrijf</span>
+          </div>
+        </div>
+        <hr class="divider">
+        <div class="field">
+          <label>Nieuw wachtwoord</label>
+          <input type="password" id="up-pwd" placeholder="Leeglaten = niet wijzigen">
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-primary" onclick="saveUserPanel()">Opslaan</button>
+        </div>
+        <div id="up-status" style="font-size:0.8rem;margin-top:10px;text-align:center;"></div>
+        <hr class="divider">
+        <button class="btn btn-ghost" onclick="logout()" style="width:100%;color:var(--danger);border-color:var(--danger);">Uitloggen</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/scan.js?v=83"></script>
+
+
+  <script>
+    window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); });
+  </script>
+  <script src="/static/ux.js"></script>
+</body>
+</html>

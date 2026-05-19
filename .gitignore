@@ -1,0 +1,7 @@
+container.db
+photos/
+venv/
+__pycache__/
+*.pyc
+.env
+serviceaccount.json

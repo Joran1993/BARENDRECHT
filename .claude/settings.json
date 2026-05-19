@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls /Users/joranstraatman/cirqo/bouwcontainer/.env*)",
+      "Bash(railway --version)",
+      "Bash(curl -s http://localhost:8000/static/beheer.js?v=6)",
+      "Bash(railway domain:*)",
+      "Bash(curl -s \"https://bouwcontainer-production.up.railway.app/static/beheer.js\")",
+      "Bash(curl -s \"https://bouwcontainer-production.up.railway.app/health\")",
+      "Bash(curl -s \"https://bouwcontainer-production.up.railway.app/static/scan.js?v=4\")"
+    ]
+  }
+}

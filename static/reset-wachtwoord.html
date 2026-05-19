@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Wachtwoord instellen — CIRQO</title>
+  <link rel="icon" href="/static/icon-cirqo-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="/static/base.css?v=5">
+  <link rel="stylesheet" href="/brand.css">
+  <style>
+    body {
+      min-height: 100dvh; display: flex; flex-direction: column;
+      justify-content: center;
+      padding: calc(env(safe-area-inset-top) + 32px) 16px
+               calc(env(safe-area-inset-bottom) + 32px);
+    }
+    .wrap { width: 100%; max-width: 400px; margin: 0 auto; }
+    .brand-sub {
+      font-size: 0.65rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.12em;
+      color: var(--orange); margin-top: 4px;
+    }
+    .panel {
+      background: #fff; border: 1px solid var(--border);
+      border-radius: 16px; padding: 24px 20px;
+    }
+    .panel h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.6rem; font-weight: 900; margin-bottom: 8px;
+    }
+    .panel p { font-size: 0.83rem; color: var(--muted); margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div style="text-align:center;margin-bottom:28px;">
+      <img src="/static/bouwkringloop-logo.jpg" alt="De Bouwkringloop" style="height:52px;max-width:100%;width:auto;margin:0 auto 10px;display:block;object-fit:contain;">
+      <div class="brand-sub">Digitaal productuitwisselingsnetwerk</div>
+    </div>
+
+    <div class="panel" id="form-panel">
+      <h1>Nieuw wachtwoord</h1>
+      <p>Kies een nieuw wachtwoord voor je account.</p>
+      <div class="field">
+        <label>Nieuw wachtwoord</label>
+        <div style="position:relative;">
+          <input type="password" id="pwd1" autocomplete="new-password" required style="padding-right:44px;width:100%;box-sizing:border-box;">
+          <button type="button" onclick="togglePwd('pwd1',this)" style="position:absolute;right:0;top:0;bottom:0;width:44px;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);padding:0;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Herhaal wachtwoord</label>
+        <input type="password" id="pwd2" autocomplete="new-password">
+      </div>
+      <button id="save-btn" class="btn btn-primary" onclick="setPassword()">Wachtwoord instellen</button>
+      <div class="error-bar" id="err"></div>
+    </div>
+
+    <div class="panel" id="ok-panel" style="display:none;text-align:center;">
+      <div style="font-size:2.5rem;margin-bottom:12px;">✓</div>
+      <h1 style="font-size:1.3rem;">Wachtwoord ingesteld!</h1>
+      <p>Je kunt nu inloggen met je nieuwe wachtwoord.</p>
+      <a href="/login" class="btn btn-primary" style="display:block;text-decoration:none;text-align:center;">Naar inloggen</a>
+    </div>
+
+    <div class="panel" id="err-panel" style="display:none;text-align:center;">
+      <div style="font-size:2.5rem;margin-bottom:12px;">⚠</div>
+      <h1 style="font-size:1.3rem;">Link ongeldig</h1>
+      <p>Deze link is verlopen of al gebruikt. Vraag een nieuwe herstelmail aan.</p>
+      <a href="/login" class="btn btn-primary" style="display:block;text-decoration:none;text-align:center;">Terug naar inloggen</a>
+    </div>
+  </div>
+
+  <script>
+    const token = new URLSearchParams(location.search).get('token');
+    if (!token) {
+      document.getElementById('form-panel').style.display = 'none';
+      document.getElementById('err-panel').style.display = 'block';
+    }
+
+    function togglePwd(id, btn) {
+      const i = document.getElementById(id);
+      i.type = i.type === 'password' ? 'text' : 'password';
+    }
+
+    async function setPassword() {
+      const p1 = document.getElementById('pwd1').value;
+      const p2 = document.getElementById('pwd2').value;
+      const err = document.getElementById('err');
+      err.style.display = 'none';
+      if (!p1 || p1.length < 6) {
+        err.textContent = 'Wachtwoord moet minimaal 6 tekens zijn.'; err.style.display = 'block'; return;
+      }
+      if (p1 !== p2) {
+        err.textContent = 'Wachtwoorden komen niet overeen.'; err.style.display = 'block'; return;
+      }
+      const btn = document.getElementById('save-btn');
+      btn.disabled = true; btn.textContent = 'Bezig…';
+      const fd = new FormData();
+      fd.append('token', token); fd.append('password', p1);
+      try {
+        const res = await fetch('/api/auth/reset-password', { method: 'POST', body: fd });
+        if (!res.ok) {
+          const d = await res.json();
+          err.textContent = d.detail || 'Er ging iets mis.'; err.style.display = 'block';
+          btn.disabled = false; btn.textContent = 'Wachtwoord instellen';
+          if (d.detail && d.detail.includes('verlopen')) {
+            document.getElementById('form-panel').style.display = 'none';
+            document.getElementById('err-panel').style.display = 'block';
+          }
+          return;
+        }
+        document.getElementById('form-panel').style.display = 'none';
+        document.getElementById('ok-panel').style.display = 'block';
+      } catch (e) {
+        err.textContent = 'Verbindingsfout. Probeer opnieuw.'; err.style.display = 'block';
+        btn.disabled = false; btn.textContent = 'Wachtwoord instellen';
+      }
+    }
+  </script>
+</body>
+</html>
