@@ -44,7 +44,7 @@ body {
   order: 1;
 }
 .app-header-logo {
-  height: 26px;
+  height: 48px;
   width: auto;
   display: block;
   flex-shrink: 0;
