@@ -250,7 +250,7 @@ def _create_waardlanden_accounts():
 
 def get_user_by_username(username: str):
     with get_cursor() as cur:
-        cur.execute("SELECT * FROM users WHERE username = %s", (username,))
+        cur.execute("SELECT * FROM users WHERE LOWER(username) = %s", (username.lower(),))
         row = cur.fetchone()
         return dict(row) if row else None
 
@@ -414,7 +414,8 @@ def get_user_by_id_full(user_id: int):
 
 def get_user_by_email(email: str):
     with get_cursor() as cur:
-        cur.execute("SELECT * FROM users WHERE email = %s OR username = %s", (email, email))
+        e = email.lower().strip()
+        cur.execute("SELECT * FROM users WHERE LOWER(email) = %s OR LOWER(username) = %s", (e, e))
         row = cur.fetchone()
         return dict(row) if row else None
 

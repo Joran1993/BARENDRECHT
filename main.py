@@ -195,7 +195,7 @@ async def login_met_token(token: str):
 
 @app.post("/api/auth/login")
 async def login(username: str = Form(...), password: str = Form(...)):
-    user = db.get_user_by_username(username)
+    user = db.get_user_by_username(username.lower().strip())
     if not user or not auth_module.verify_password(password, user["password"]):
         raise HTTPException(status_code=401, detail="Onjuiste gebruikersnaam of wachtwoord")
     token = auth_module.create_token(
