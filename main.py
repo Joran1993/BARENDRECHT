@@ -1665,8 +1665,8 @@ BRANDS = {
         "sub": "Digitaal productuitwisselingsnetwerk", "gemeente": "Almere",
     },
     "bar": {
-        "primary": "#09be86", "secondary": "#07a874",
-        "logo": "/static/bar-logo.jpg", "name": "BAR Afvalbeheer",
+        "primary": "#1e4a8a", "secondary": "#163a6e",
+        "logo": "/static/bar-logo.jpg", "name": "DCNB",
         "sub": "Breng uw afval slim in", "gemeente": "Barendrecht",
     },
     "hvc": {
