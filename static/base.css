@@ -55,8 +55,8 @@ body {
 }
 .hdr-logo-img {
   height: auto !important;
-  max-height: 48px !important;
-  max-width: 240px !important;
+  max-height: 72px !important;
+  max-width: 300px !important;
   width: auto !important;
   display: block;
   margin-left: 8px;
